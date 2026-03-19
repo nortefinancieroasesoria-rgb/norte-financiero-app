@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norte Financiero — Consultora</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f5f5f2;color:#1a1a1a;min-height:100vh}
+.app{max-width:960px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.08)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.5rem;border-bottom:1px solid #e8e8e8;background:#fff;position:sticky;top:0;z-index:10}
+.logo{font-family:'Lora',serif;font-size:18px}.logo em{color:#1D9E75;font-style:normal}
+.consultora-tag{font-size:11px;font-weight:500;background:#FFF8E1;color:#633806;padding:4px 12px;border-radius:20px;border:1px solid #FAC775}
+.content{padding:1.5rem}
+.ptitle{font-family:'Lora',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+.psub{font-size:13px;color:#888;margin-bottom:1.5rem;line-height:1.6}
+
+/* NUEVA CLIENTA FORM */
+.new-form{background:#fafaf8;border:1px solid #e8e8e8;border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.form-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:1rem}
+.form-row{display:flex;gap:10px;flex-wrap:wrap}
+.finput{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;flex:1;min-width:180px}
+.finput:focus{border-color:#1D9E75}
+.fbtn{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:9px 20px;cursor:pointer;white-space:nowrap}
+.fbtn:hover{background:#0F6E56}
+.fbtn:disabled{background:#ccc;cursor:not-allowed}
+
+/* LISTA CLIENTAS */
+.list-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:1rem}
+.empty{text-align:center;padding:3rem;color:#888;font-size:14px;line-height:1.6}
+.ccard{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1rem 1.25rem;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.cavatar{width:38px;height:38px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#0F6E56;flex-shrink:0}
+.cinfo{flex:1}
+.cname{font-size:14px;font-weight:500;margin-bottom:2px}
+.cmeta{font-size:11px;color:#888}
+.csess{display:flex;gap:6px}
+.stag{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px}
+.stag.on{background:#E1F5EE;color:#0F6E56}
+.stag.off{background:#f5f5f5;color:#aaa}
+.cactions{display:flex;gap:8px}
+.clink{font-size:11px;font-weight:500;color:#1D9E75;border:1px solid #1D9E75;border-radius:6px;padding:4px 10px;cursor:pointer;background:transparent;font-family:'Inter',sans-serif;text-decoration:none}
+.cunlock{font-size:11px;font-weight:500;color:#633806;border:1px solid #FAC775;background:#FFF8E1;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif}
+.cunlock:hover{background:#FAC775}
+
+/* UNLOCK OVERLAY */
+.ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.ovbox{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;margin:1rem}
+.ovtit{font-family:'Lora',serif;font-size:18px;margin-bottom:.35rem}
+.ovsub{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.5}
+.ovinp{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;width:100%;margin-bottom:.75rem}
+.ovinp:focus{border-color:#1D9E75}
+.overr{font-size:12px;color:#E24B4A;margin-bottom:.75rem;display:none}
+.ovbtn{width:100%;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;margin-bottom:.5rem}
+.ovbtn:hover{background:#0F6E56}
+.ovcnc{width:100%;font-size:12px;font-family:'Inter',sans-serif;background:transparent;color:#888;border:none;cursor:pointer;padding:6px}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:10px 20px;border-radius:8px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* LINK MODAL */
+.lkbox{background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:480px;margin:1rem}
+.lktit{font-family:'Lora',serif;font-size:16px;margin-bottom:.5rem}
+.lksub{font-size:12px;color:#888;margin-bottom:1rem;line-height:1.5}
+.lkurl{font-size:12px;font-family:'Inter',sans-serif;background:#f5f5f5;border:1px solid #e8e8e8;border-radius:6px;padding:8px 12px;word-break:break-all;color:#444;margin-bottom:.75rem}
+.lkbtn{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:9px 20px;cursor:pointer;margin-right:8px}
+.lkbtn:hover{background:#0F6E56}
+.lkcnc{font-size:12px;font-family:'Inter',sans-serif;background:transparent;color:#888;border:none;cursor:pointer;padding:6px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="nav">
+    <div class="logo">Norte <em>Financiero</em></div>
+    <div class="consultora-tag">Panel Consultora</div>
+  </div>
+  <div class="content">
+    <p class="ptitle">Mis clientas</p>
+    <p class="psub">Creá una clienta nueva para cada sesión. Su link personal se genera automáticamente.</p>
+
+    <div class="new-form">
+      <div class="form-title">Nueva clienta</div>
+      <div class="form-row">
+        <input class="finput" id="inp-nombre" type="text" placeholder="Nombre de la clienta" onkeydown="if(event.key==='Enter')crearClienta()">
+        <button class="fbtn" id="btn-crear" onclick="crearClienta()">Crear y generar link</button>
+      </div>
+    </div>
+
+    <div class="list-title">Clientas activas</div>
+    <div id="lista"></div>
+  </div>
+</div>
+
+<!-- OVERLAY UNLOCK -->
+<div class="ov" id="ov-unlock">
+  <div class="ovbox">
+    <div class="ovtit" id="ov-tit">Dar acceso a Sesión</div>
+    <div class="ovsub" id="ov-sub">Confirmá para desbloquear esta sesión para la clienta.</div>
+    <input class="ovinp" type="password" id="ov-pw" placeholder="Tu contraseña" onkeydown="if(event.key==='Enter')doUnlock()">
+    <div class="overr" id="ov-err">Contraseña incorrecta.</div>
+    <button class="ovbtn" onclick="doUnlock()">Confirmar desbloqueo</button>
+    <button class="ovcnc" onclick="closeOv()">Cancelar</button>
+  </div>
+</div>
+
+<!-- OVERLAY LINK -->
+<div class="ov" id="ov-link">
+  <div class="lkbox">
+    <div class="lktit" id="lk-tit">Link de la clienta</div>
+    <div class="lksub">Compartí este link con tu clienta. Solo ella puede verlo.</div>
+    <div class="lkurl" id="lk-url"></div>
+    <button class="lkbtn" onclick="copyLink()">Copiar link</button>
+    <button class="lkcnc" onclick="closeLinkOv()">Cerrar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbzC4VXiT9Idqxil4eiQcoIqI87ZpPvtApII7vcsiZkT-pCBEcdvDJarFvqDsnJAP9Cm8Q/exec';
+var CLIENTA_URL = window.location.href.replace('consultora.html','clienta.html');
+var pendingUnlock = null;
+var currentLinkUrl = '';
+var clientas = [];
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+async function apiPost(data) {
+  // Google Apps Script requires redirect follow and no custom headers for CORS
+  var form = new FormData();
+  form.append('data', JSON.stringify(data));
+  var r = await fetch(API, {
+    method:'POST',
+    body: JSON.stringify(data),
+    redirect: 'follow'
+  });
+  return r.json();
+}
+
+async function apiGet(params) {
+  var url = API + '?' + Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+  var r = await fetch(url, {redirect: 'follow'});
+  return r.json();
+}
+
+async function crearClienta() {
+  var nombre = document.getElementById('inp-nombre').value.trim();
+  if (!nombre) { toast('Ingresá el nombre de la clienta'); return; }
+  var btn = document.getElementById('btn-crear');
+  btn.disabled = true; btn.textContent = 'Creando...';
+  try {
+    var res = await apiPost({action:'create', nombre:nombre, tipo:'fijo'});
+    if (res.ok) {
+      document.getElementById('inp-nombre').value = '';
+      toast('Clienta creada');
+      await cargarClientas();
+      showLink(res.id, nombre);
+    } else {
+      toast('Error al crear clienta');
+    }
+  } catch(e) {
+    toast('Error de conexión');
+  }
+  btn.disabled = false; btn.textContent = 'Crear y generar link';
+}
+
+async function cargarClientas() {
+  try {
+    var data = await apiGet({action:'getClientas'});
+    clientas = Array.isArray(data) ? data : [];
+    renderLista();
+  } catch(e) {
+    document.getElementById('lista').innerHTML = '<div class="empty">No se pudo cargar la lista.<br>Verificá tu conexión.</div>';
+  }
+}
+
+function renderLista() {
+  var el = document.getElementById('lista');
+  if (!clientas.length) {
+    el.innerHTML = '<div class="empty">Todavía no tenés clientas.<br>Creá la primera arriba.</div>';
+    return;
+  }
+  el.innerHTML = clientas.slice().reverse().map(function(c) {
+    var ini = (c.Nombre||'?')[0].toUpperCase();
+    var s2 = c.S2 === true || c.S2 === 'true' || c.S2 === 'TRUE';
+    var s3 = c.S3 === true || c.S3 === 'true' || c.S3 === 'TRUE';
+    var fecha = c.Fecha ? new Date(c.Fecha).toLocaleDateString('es-CR') : '';
+    return '<div class="ccard">' +
+      '<div class="cavatar">'+ini+'</div>' +
+      '<div class="cinfo">' +
+        '<div class="cname">'+c.Nombre+'</div>' +
+        '<div class="cmeta">'+fecha+' &nbsp;·&nbsp; ID: '+c.ID+'</div>' +
+      '</div>' +
+      '<div class="csess">' +
+        '<span class="stag off">S1</span>' +
+        '<span class="stag '+(s2?'on':'off')+'">S2</span>' +
+        '<span class="stag '+(s3?'on':'off')+'">S3</span>' +
+      '</div>' +
+      '<div class="cactions">' +
+        '<button class="clink" onclick="showLink(\''+c.ID+'\',\''+c.Nombre+'\')">Ver link</button>' +
+        (!s2 ? '<button class="cunlock" onclick="openUnlock(\''+c.ID+'\',\''+c.Nombre+'\',2)">Dar S2</button>' : '') +
+        (s2 && !s3 ? '<button class="cunlock" onclick="openUnlock(\''+c.ID+'\',\''+c.Nombre+'\',3)">Dar S3</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function showLink(id, nombre) {
+  currentLinkUrl = CLIENTA_URL + '?id=' + id;
+  document.getElementById('lk-tit').textContent = 'Link de ' + nombre;
+  document.getElementById('lk-url').textContent = currentLinkUrl;
+  document.getElementById('ov-link').classList.add('show');
+}
+
+function closeLinkOv() {
+  document.getElementById('ov-link').classList.remove('show');
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(currentLinkUrl).then(function(){
+    toast('Link copiado');
+    closeLinkOv();
+  });
+}
+
+function openUnlock(id, nombre, sess) {
+  pendingUnlock = {id:id, nombre:nombre, sess:sess};
+  document.getElementById('ov-tit').textContent = 'Dar acceso Sesión '+sess+' — '+nombre;
+  document.getElementById('ov-sub').textContent = 'Ingresá tu contraseña para desbloquear la Sesión '+sess+' para '+nombre+'.';
+  document.getElementById('ov-pw').value = '';
+  document.getElementById('ov-err').style.display = 'none';
+  document.getElementById('ov-unlock').classList.add('show');
+  setTimeout(function(){ document.getElementById('ov-pw').focus(); }, 100);
+}
+
+function closeOv() {
+  document.getElementById('ov-unlock').classList.remove('show');
+  pendingUnlock = null;
+}
+
+async function doUnlock() {
+  var pw = document.getElementById('ov-pw').value;
+  var btn = document.querySelector('#ov-unlock .ovbtn');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  try {
+    var res = await apiPost({action:'unlock', id:pendingUnlock.id, sess:pendingUnlock.sess, pw:pw});
+    if (res.ok) {
+      closeOv();
+      toast('Sesión '+pendingUnlock.sess+' desbloqueada para '+pendingUnlock.nombre);
+      await cargarClientas();
+    } else {
+      document.getElementById('ov-err').style.display = 'block';
+      document.getElementById('ov-pw').value = '';
+    }
+  } catch(e) {
+    toast('Error de conexión');
+  }
+  btn.disabled = false; btn.textContent = 'Confirmar desbloqueo';
+}
+
+// Cargar al iniciar
+cargarClientas();
+</script>
+</body>
+</html>
