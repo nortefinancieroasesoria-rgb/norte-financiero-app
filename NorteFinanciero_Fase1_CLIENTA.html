@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norte Financiero — Fase 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f5f5f2;color:#1a1a1a}
+.app{max-width:900px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.08)}
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.5rem;border-bottom:1px solid #e8e8e8;background:#fff;position:sticky;top:0;z-index:10}
+.logo{font-family:'Lora',serif;font-size:18px}.logo em{color:#1D9E75;font-style:normal}
+.nav-r{display:flex;align-items:center;gap:8px}
+.fase-tag{font-size:10px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.name-tag{font-size:11px;font-weight:500;background:#E1F5EE;color:#0F6E56;padding:4px 12px;border-radius:20px}
+/* SESIONES */
+.sess-nav{display:flex;border-bottom:1px solid #e8e8e8}
+.sess-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:.875rem .5rem;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;transition:all .2s;font-family:'Inter',sans-serif;gap:2px}
+.sess-btn.active{border-bottom-color:#1D9E75}
+.sess-btn.locked{cursor:default;opacity:.45}
+.sn{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888}
+.sess-btn.active .sn{color:#1D9E75}
+.sl{font-size:12px;font-weight:500;color:#888}
+.sess-btn.active .sl{color:#1a1a1a}
+.si{font-size:13px}
+/* CONTENIDO */
+.pg{display:none;padding:1.5rem}
+.pg.show{display:block}
+.ptitle{font-family:'Lora',serif;font-size:21px;font-weight:400;margin-bottom:4px}
+.psub{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.6}
+/* SUB-TABS */
+.stabs{display:flex;gap:6px;padding:.875rem 1.5rem;background:#fafaf8;border-bottom:1px solid #e8e8e8;overflow-x:auto;flex-wrap:wrap}
+.stab{font-size:11px;color:#888;padding:5px 14px;border-radius:20px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;white-space:nowrap;font-family:'Inter',sans-serif;transition:all .2s}
+.stab.on{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.sub{display:none}.sub.show{display:block}.sub-wrap{padding:1.5rem}
+/* INPUTS */
+.ch{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:#888;margin:1.1rem 0 6px;padding-bottom:4px;border-bottom:1px solid #e8e8e8}
+.sh{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin:.6rem 0 4px}
+.ir{display:flex;align-items:center;gap:8px;border:1px solid #e8e8e8;border-radius:8px;padding:8px 12px;margin-bottom:6px;transition:border-color .2s}
+.ir:focus-within{border-color:#1D9E75}
+.id{font-size:13px;flex:1}
+.cu{font-size:11px;color:#888;font-weight:500}
+.ai{font-size:14px;font-weight:500;border:none;background:transparent;text-align:right;width:115px;outline:none;font-family:'Inter',sans-serif}
+.tot{background:#fafaf8;border:1px solid #e8e8e8;border-radius:10px;padding:.875rem 1.1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between}
+.tl{font-size:12px;font-weight:500;color:#888}
+.tv{font-size:20px;font-weight:500}
+.tv.g{color:#1D9E75}.tv.r{color:#E24B4A}.tv.b{color:#378ADD}
+.ab{font-size:12px;color:#1D9E75;border:1px dashed #5DCAA5;background:transparent;border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-top:5px;font-family:'Inter',sans-serif}
+.ab:hover{background:#E1F5EE}
+/* HERO */
+.hero{border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.25rem;border:1px solid}
+.hero.sup{background:#E1F5EE;border-color:#9FE1CB}
+.hero.def{background:#FCEBEB;border-color:#F7C1C1}
+.hero.eq{background:#E6F1FB;border-color:#B5D4F4}
+.hl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.hero.sup .hl{color:#0F6E56}.hero.def .hl{color:#A32D2D}.hero.eq .hl{color:#185FA5}
+.ha{font-family:'Lora',serif;font-size:34px}
+.hero.sup .ha{color:#085041}.hero.def .ha{color:#791F1F}.hero.eq .ha{color:#0C447C}
+.hm{font-size:12px;margin-top:5px;line-height:1.5}
+.hero.sup .hm{color:#0F6E56}.hero.def .hm{color:#993C1D}.hero.eq .hm{color:#185FA5}
+/* FLUJO CARDS */
+.fc{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1rem;margin-bottom:10px}
+.fr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
+.fr:last-child{border-bottom:none}
+.fr .lb{color:#888}
+.fr.tot2{padding-top:8px;border-top:1px solid #e8e8e8;border-bottom:none}
+.fr.tot2 .lb{font-weight:500;color:#1a1a1a}
+.bw{margin:.6rem 0}
+.br{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px}
+.bt{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px;transition:width .5s}
+.bf.i{background:#1D9E75}.bf.e{background:#D85A30}.bf.s{background:#378ADD}
+/* IRC BOX */
+.ib{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:.875rem 1.1rem;margin-bottom:1.25rem}
+.il{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#0F6E56;margin-bottom:3px}
+.iv{font-family:'Lora',serif;font-size:26px;color:#085041}
+.id2{font-size:11px;color:#0F6E56;margin-top:3px;line-height:1.5}
+/* CHART */
+.cw{background:#fafaf8;border:1px solid #e8e8e8;border-radius:10px;padding:1rem;margin-bottom:1.25rem}
+.ct{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:.75rem}
+/* ESCENARIOS */
+.eg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.ec{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.875rem}
+.eh{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #f0f0f0}
+.eh.bajo{color:#A32D2D}.eh.medio{color:#BA7517}.eh.alto{color:#1D9E75}
+.er{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:#888}
+.er .ev{font-weight:500;color:#1a1a1a}
+.en{margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;font-size:12px;font-weight:500}
+.es{margin-top:4px;font-size:10px;color:#888;font-style:italic}
+.regla{background:#FFF8E1;border:1px solid #FAC775;border-radius:8px;padding:.75rem 1rem;font-size:12px;color:#633806;line-height:1.5;margin-top:1rem}
+/* ECUACIÓN */
+.peq{display:flex;align-items:center;justify-content:center;gap:10px;padding:1.1rem;background:#fafaf8;border-radius:10px;border:1px solid #e8e8e8;margin-bottom:1.25rem;flex-wrap:wrap}
+.pb{text-align:center;padding:.5rem .75rem}
+.pl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.pv{font-size:18px;font-weight:500}
+.pv.g{color:#1D9E75}.pv.r{color:#E24B4A}
+.po{font-size:20px;color:#ccc;font-weight:300}
+.pr{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1.1rem;margin-bottom:1.25rem}
+.pg2{font-family:'Lora',serif;font-size:30px;text-align:center;margin-bottom:5px}
+.pm{font-size:12px;color:#888;text-align:center;line-height:1.5}
+/* INDICADORES */
+.pbar{display:flex;align-items:center;gap:6px;padding:.75rem 1rem;background:#fafaf8;border-radius:8px;margin-bottom:1.25rem;border:1px solid #e8e8e8;flex-wrap:wrap}
+.plb{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.pmv{font-size:13px;font-weight:500;color:#1D9E75}
+.pirc{font-size:13px;font-weight:500}
+.pirclb{font-size:11px;color:#888;margin-left:12px}
+.icard{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.itop{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;border-bottom:1px solid #f0f0f0}
+.ic{padding:.75rem 1rem;border-right:1px solid #f0f0f0}
+.ic:last-child{border-right:none}
+.icl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:4px}
+.inn{display:flex;align-items:center;font-size:13px;font-weight:500}
+.nb{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f0f0f0;font-size:11px;font-weight:500;color:#888;margin-right:7px;flex-shrink:0}
+.sd{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.sr{display:flex;align-items:center;gap:8px}
+.ibot{padding:.75rem 1rem;background:#fafafa}
+.iil{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:5px}
+.iit{font-size:13px;color:#444;line-height:1.6;font-style:italic;min-height:18px}
+/* ADMIN */
+.adm{background:#fff;padding:1.5rem}
+.admbar{padding:.75rem 1rem;background:#FFF8E1;border:1px solid #FAC775;border-radius:8px;font-size:12px;color:#633806;margin-bottom:1.25rem}
+.admsec{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.admtit{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #f0f0f0}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem}
+.af{display:flex;flex-direction:column;gap:3px}
+.al{font-size:11px;color:#888}
+.ainp{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:6px 10px;outline:none;width:100%}
+.ainp:focus{border-color:#1D9E75}
+.asel{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:6px 10px;outline:none;width:100%;cursor:pointer;background:#fff}
+.asel:focus{border-color:#1D9E75}
+.ata{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:8px 10px;outline:none;width:100%;resize:vertical;min-height:55px;line-height:1.5}
+.ata:focus{border-color:#1D9E75}
+.iap{background:#fafaf8;border:1px solid #e8e8e8;border-radius:8px;padding:1rem;margin-bottom:8px}
+.iaprow{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.apbtn{font-size:12px;font-weight:500;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:9px 24px;cursor:pointer;font-family:'Inter',sans-serif;width:100%;margin-top:.5rem}
+.apbtn:hover{background:#0F6E56}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:.5rem}
+.mf{display:flex;flex-direction:column;gap:2px}
+.ml{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+.mi{font-size:12px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:5px 8px;outline:none;width:100%}
+.mi:focus{border-color:#1D9E75}
+/* BLOQUEADA */
+.lkv{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center}
+.lkc{width:64px;height:64px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;font-size:28px}
+.lkt{font-family:'Lora',serif;font-size:20px;margin-bottom:.5rem}
+.lks{font-size:13px;color:#888;line-height:1.6;max-width:300px}
+/* OVERLAY */
+.ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center}
+.ovbox{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;margin:1rem}
+.ovtit{font-family:'Lora',serif;font-size:18px;margin-bottom:.35rem}
+.ovsub{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.5}
+.ovinp{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;width:100%;margin-bottom:.75rem}
+.ovinp:focus{border-color:#1D9E75}
+.overr{font-size:12px;color:#E24B4A;margin-bottom:.75rem;display:none}
+.ovbtn{width:100%;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;margin-bottom:.5rem}
+.ovbtn:hover{background:#0F6E56}
+.ovcnc{width:100%;font-size:12px;font-family:'Inter',sans-serif;background:transparent;color:#888;border:none;cursor:pointer;padding:6px}
+/* SETUP */
+.setup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(245,245,242,.97);z-index:300;display:flex;align-items:center;justify-content:center}
+.sbox{background:#fff;border-radius:16px;border:1px solid #e8e8e8;padding:2rem;width:100%;max-width:400px;margin:1rem}
+.slogo{font-family:'Lora',serif;font-size:22px;margin-bottom:4px}
+.slogo em{color:#1D9E75;font-style:normal}
+.ssub{font-size:12px;color:#888;margin-bottom:1.75rem}
+.sf{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem}
+.slb{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.si2{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;width:100%}
+.si2:focus{border-color:#1D9E75}
+.serr{font-size:12px;color:#E24B4A;margin-bottom:.75rem;display:none}
+.sbtn{width:100%;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:11px;cursor:pointer;margin-top:.5rem}
+.sbtn:hover{background:#0F6E56}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SETUP -->
+<div class="setup" id="setup">
+  <div class="sbox">
+    <div class="slogo">Norte <em>Financiero</em></div>
+    <div class="ssub">Fase 1 — Ingresá el nombre de la clienta para comenzar</div>
+    <div class="sf">
+      <div class="slb">Nombre de la clienta</div>
+      <input class="si2" id="sname" type="text" placeholder="Ej: Andrea Mora" onkeydown="if(event.key==='Enter')startApp()">
+    </div>
+    <div class="serr" id="serr">Ingresá el nombre para continuar.</div>
+    <button class="sbtn" onclick="startApp()">Comenzar sesión</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="logo">Norte <em>Financiero</em></div>
+  <div class="nav-r">
+    <div class="fase-tag">Fase 1</div>
+    <div class="name-tag" id="ntag">—</div>
+  </div>
+</div>
+
+<!-- SESIONES NAV -->
+<div class="sess-nav">
+  <button class="sess-btn locked" id="sb1" onclick="goSess(1)">
+    <span class="sn">Sesión 1</span>
+    <span class="sl">Diagnóstico</span>
+    <span class="si">🔒</span>
+  </button>
+  <button class="sess-btn locked" id="sb2" onclick="goSess(2)">
+    <span class="sn">Sesión 2</span>
+    <span class="sl">Flujo + Ecuación</span>
+    <span class="si">🔒</span>
+  </button>
+  <button class="sess-btn locked" id="sb3" onclick="goSess(3)">
+    <span class="sn">Sesión 3</span>
+    <span class="sl">Indicadores</span>
+    <span class="si">🔒</span>
+  </button>
+</div>
+
+<!-- SESIÓN 1 -->
+<div class="pg" id="p1">
+  <div class="lkv">
+    <div class="lkc">🔒</div>
+    <div class="lkt">Sesión 1 — Diagnóstico</div>
+    <div class="lks">Esta sesión estará disponible próximamente. Tu consultora te dará acceso cuando sea el momento.</div>
+  </div>
+</div>
+
+<!-- SESIÓN 2 -->
+<div id="p2">
+  <div class="stabs" id="stabs2"></div>
+  <div id="subs2"></div>
+</div>
+
+<!-- SESIÓN 3 -->
+<div id="p3">
+  <div id="s3admin" style="display:none"></div>
+  <div id="s3client" style="display:none"></div>
+  <div id="s3locked">
+    <div class="lkv">
+      <div class="lkc">🔒</div>
+      <div class="lkt">Sesión 3 — Indicadores</div>
+      <div class="lks">Tu consultora preparará tu diagnóstico financiero personalizado.</div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY CONTRASEÑA -->
+<div class="ov" id="pwov" style="display:none">
+  <div class="ovbox">
+    <div class="ovtit" id="pwt">Desbloquear sesión</div>
+    <div class="ovsub" id="pws">Ingresá la contraseña para dar acceso a la clienta.</div>
+    <input class="ovinp" type="password" id="pwi" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doPw()">
+    <div class="overr" id="pwe">Contraseña incorrecta. Intentá de nuevo.</div>
+    <button class="ovbtn" onclick="doPw()">Confirmar</button>
+    <button class="ovcnc" onclick="closePw()">Cancelar</button>
+  </div>
+</div>
+
+</div>
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+var PW = '123';
+var TIPO = 'fijo'; // se actualiza en diagnóstico
+var IRC = 0;
+var CHART = null;
+var UNLOCKED = {2: false, 3: false};
+var PENDING_SESS = null;
+var INDS = [
+  {n:1, nm:'Cobertura de gastos', rng:'≤ 90%'},
+  {n:2, nm:'Distribución del gasto', rng:'≤ 50% en fijos'},
+  {n:3, nm:'Ingreso estable', rng:'≥ 80%'},
+  {n:4, nm:'Liquidez', rng:'≥ 1.5x'},
+  {n:5, nm:'Endeudamiento', rng:'≤ 50%'},
+  {n:6, nm:'Tasa de ahorro', rng:'≥ 10%'},
+  {n:7, nm:'Deuda buena vs deuda mala', rng:'≤ 40% corto plazo'},
+];
+var COLS = {
+  verde:{bg:'#1D9E75',lb:'Saludable',tx:'#085041'},
+  amarillo:{bg:'#EF9F27',lb:'Precaución',tx:'#633806'},
+  rojo:{bg:'#E24B4A',lb:'Atención urgente',tx:'#791F1F'},
+  gris:{bg:'#888780',lb:'Sin dato',tx:'#444441'}
+};
+var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'];
+
+// ─── SETUP ────────────────────────────────────────────────
+function startApp() {
+  var nm = document.getElementById('sname').value.trim();
+  if (!nm) { document.getElementById('serr').style.display='block'; return; }
+  document.getElementById('serr').style.display='none';
+  document.getElementById('ntag').textContent = nm;
+  document.getElementById('setup').style.display='none';
+  buildSess2();
+  buildSess3();
+}
+
+// ─── NAVEGACIÓN ───────────────────────────────────────────
+function goSess(n) {
+  if (!UNLOCKED[n] && n !== 1) { askPw(n); return; }
+  showSess(n);
+}
+
+function showSess(n) {
+  // Ocultar todos
+  document.getElementById('p1').style.display='none';
+  document.getElementById('p2').style.display='none';
+  document.getElementById('p3').style.display='none';
+  // Quitar active
+  [1,2,3].forEach(function(i){ document.getElementById('sb'+i).classList.remove('active'); });
+  // Mostrar target
+  document.getElementById('p'+n).style.display='block';
+  document.getElementById('sb'+n).classList.add('active');
+}
+
+// ─── CONTRASEÑA ───────────────────────────────────────────
+function askPw(n) {
+  PENDING_SESS = n;
+  document.getElementById('pwt').textContent = 'Desbloquear Sesión ' + n;
+  document.getElementById('pws').textContent = n === 3
+    ? 'Ingresá la contraseña para dar acceso a los Indicadores.'
+    : 'Ingresá la contraseña para dar acceso al Flujo y Ecuación Contable.';
+  document.getElementById('pwi').value = '';
+  document.getElementById('pwe').style.display = 'none';
+  document.getElementById('pwov').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('pwi').focus(); }, 100);
+}
+
+function closePw() {
+  document.getElementById('pwov').style.display = 'none';
+  PENDING_SESS = null;
+}
+
+function doPw() {
+  var v = document.getElementById('pwi').value;
+  if (v !== PW) {
+    document.getElementById('pwe').style.display = 'block';
+    document.getElementById('pwi').value = '';
+    return;
+  }
+  var n = PENDING_SESS;
+  UNLOCKED[n] = true;
+  // Actualizar botón sesión
+  var btn = document.getElementById('sb'+n);
+  btn.classList.remove('locked');
+  var si = btn.querySelector('.si');
+  if (si) { si.textContent = '✓'; si.style.color = '#1D9E75'; }
+  closePw();
+  showSess(n);
+}
+
+// ─── UTILIDADES ───────────────────────────────────────────
+function fmt(n) { return '₡' + Math.round(n).toLocaleString('es-CR'); }
+function s(cls) { return Array.from(document.querySelectorAll('.'+cls)).reduce(function(a,e){ return a+(parseFloat(e.value)||0); },0); }
+function g(id) { var e=document.getElementById(id); return e ? e : null; }
+function st(id,v) { var e=g(id); if(e) e.textContent=v; }
+function ar(cid, cls, ph, fn) {
+  var d=document.createElement('div'); d.className='ir';
+  d.innerHTML='<input style="border:none;background:transparent;outline:none;flex:1;font-size:13px;font-family:Inter,sans-serif" type="text" placeholder="'+ph+'"><span class="cu">₡</span><input class="ai '+cls+'" type="number" value="0" oninput="'+fn+'" style="font-family:Inter,sans-serif">';
+  document.getElementById(cid).appendChild(d);
+}
+
+function showTab(tabId, allTabs, btn, allBtns) {
+  allTabs.forEach(function(t){ var e=g(t); if(e) e.style.display='none'; });
+  var target = g(tabId); if(target) target.style.display='block';
+  allBtns.forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+
+// ─── SESIÓN 2 — CONSTRUCCIÓN ──────────────────────────────
+function buildSess2() {
+  if (TIPO === 'fijo') buildFijo();
+  else buildMixto();
+}
+
+function buildFijo() {
+  var tabsEl = document.getElementById('stabs2');
+  var subsEl = document.getElementById('subs2');
+  var tabs = ['ingresos','gastos','ahorro','flujo','ecuacion'];
+  var labels = ['Mis ingresos','Mis gastos','Mi ahorro','Mi flujo','Ecuación contable'];
+
+  tabsEl.innerHTML = tabs.map(function(t,i){
+    return '<button class="stab'+(i===0?' on':'')+'" onclick="switchS2(\''+t+'\',this)">'+labels[i]+'</button>';
+  }).join('');
+
+  subsEl.innerHTML =
+    '<div id="sub-ingresos" class="sub-wrap" style="display:block">' + htmlIngresos() + '</div>' +
+    '<div id="sub-gastos" class="sub-wrap" style="display:none">' + htmlGastos() + '</div>' +
+    '<div id="sub-ahorro" class="sub-wrap" style="display:none">' + htmlAhorro() + '</div>' +
+    '<div id="sub-flujo" class="sub-wrap" style="display:none">' + htmlFlujoFijo() + '</div>' +
+    '<div id="sub-ecuacion" class="sub-wrap" style="display:none">' + htmlEcuacion() + '</div>';
+}
+
+function switchS2(tab, btn) {
+  var all = ['ingresos','gastos','ahorro','flujo','patron','mes','flujo-mx','ecuacion'];
+  all.forEach(function(t){ var e=g('sub-'+t); if(e) e.style.display='none'; });
+  var target = g('sub-'+tab); if(target) target.style.display='block';
+  document.querySelectorAll('#stabs2 .stab').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+
+function buildMixto() {
+  var tabsEl = document.getElementById('stabs2');
+  var subsEl = document.getElementById('subs2');
+  var tabs = ['patron','mes','flujo-mx','ecuacion'];
+  var labels = ['Patrón anual','Mes actual','Mi flujo','Ecuación contable'];
+
+  tabsEl.innerHTML = tabs.map(function(t,i){
+    return '<button class="stab'+(i===0?' on':'')+'" onclick="switchS2(\''+t+'\',this)">'+labels[i]+'</button>';
+  }).join('');
+
+  subsEl.innerHTML =
+    '<div id="sub-patron" class="sub-wrap" style="display:block">' + htmlPatron() + '</div>' +
+    '<div id="sub-mes" class="sub-wrap" style="display:none">' + htmlMes() + '</div>' +
+    '<div id="sub-flujo-mx" class="sub-wrap" style="display:none">' + htmlFlujoMixto() + '</div>' +
+    '<div id="sub-ecuacion" class="sub-wrap" style="display:none">' + htmlEcuacion() + '</div>';
+}
+
+// ─── HTML INGRESO FIJO ─────────────────────────────────────
+function htmlIngresos() { return `
+<p class="ptitle">Mis ingresos</p>
+<p class="psub">Todo el dinero que entra a tu bolsillo cada mes.</p>
+<div class="ch">Ingresos fijos</div>
+<div id="fi-fijos">
+  <div class="ir"><span class="id">Salario / Empleo principal (neto)</span><span class="cu">₡</span><input class="ai fi-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Pensión / Jubilación</span><span class="cu">₡</span><input class="ai fi-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Alquiler de propiedad</span><span class="cu">₡</span><input class="ai fi-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Pensión alimenticia que recibo</span><span class="cu">₡</span><input class="ai fi-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Apoyo de familia (regular)</span><span class="cu">₡</span><input class="ai fi-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('fi-fijos','fi-fijo','Otro ingreso fijo','rcFijo()')">+ Agregar</button>
+<div class="ch">Ingresos variables</div>
+<div id="fi-vars">
+  <div class="ir"><span class="id">Freelance / Chambas</span><span class="cu">₡</span><input class="ai fi-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Negocio propio</span><span class="cu">₡</span><input class="ai fi-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Comisiones / Bonos</span><span class="cu">₡</span><input class="ai fi-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Intereses de inversiones</span><span class="cu">₡</span><input class="ai fi-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('fi-vars','fi-var','Otro ingreso variable','rcFijo()')">+ Agregar</button>
+<div class="tot"><span class="tl">Total ingresos del mes</span><span class="tv g" id="fi-ti">₡0</span></div>`; }
+
+function htmlGastos() { return `
+<p class="ptitle">Mis gastos</p>
+<p class="psub">Todo lo que sale. Ser honesta aquí es el primer paso para recuperar el control.</p>
+<div class="ch">Gastos fijos</div>
+<div class="sh">Vivienda</div>
+<div id="gf-viv">
+  <div class="ir"><span class="id">Renta o pago de hipoteca</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Cuota mantenimiento / bienes raíces</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Servicios básicos</div>
+<div id="gf-srv">
+  <div class="ir"><span class="id">Luz</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Agua</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Internet</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Teléfono celular</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Cable / Streaming</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Transporte fijo</div>
+<div id="gf-trf">
+  <div class="ir"><span class="id">Pago de auto (crédito)</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Seguro del auto (INS)</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Marchamo (COSEVI)</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Pagos de deudas</div>
+<div id="gf-deu">
+  <div class="ir"><span class="id">Tarjeta de crédito 1</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 2</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 3</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Préstamo personal</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Préstamo familiar</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Compras a meses</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('gf-deu','gf-fijo','Otra deuda','rcFijo()')">+ Agregar deuda</button>
+<div class="sh">Familia</div>
+<div id="gf-fam">
+  <div class="ir"><span class="id">Colegiatura / Guardería</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Pensión alimenticia que pago</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Ayuda a padres / familiares</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Salud fija</div>
+<div id="gf-sal">
+  <div class="ir"><span class="id">Seguro médico privado (INS)</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Seguro complementario CCSS</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Terapia / Psicólogo</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Medicamentos crónicos</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Otros fijos</div>
+<div id="gf-otr">
+  <div class="ir"><span class="id">Ayuda doméstica / limpieza</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Apps / Suscripciones digitales</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Envíos de dinero al exterior</span><span class="cu">₡</span><input class="ai gf-fijo" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('gf-otr','gf-fijo','Otro gasto fijo','rcFijo()')">+ Agregar fijo</button>
+<div class="ch">Gastos variables</div>
+<div class="sh">Transporte variable</div>
+<div id="gv-trf">
+  <div class="ir"><span class="id">Gasolina / Combustible</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Transporte público / bus</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Uber / Taxis</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Mantenimiento del auto</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Alimentación y hogar</div>
+<div id="gv-alm">
+  <div class="ir"><span class="id">Supermercado / Despensa</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Feria / Mercado / Verdulería</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Productos limpieza del hogar</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Artículos de higiene personal</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Gas (tanque / tubería)</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Familia variable</div>
+<div id="gv-fam">
+  <div class="ir"><span class="id">Útiles / uniformes escolares</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Actividades extracurriculares</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Pañales / leche / artículos bebé</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Salud variable</div>
+<div id="gv-sal">
+  <div class="ir"><span class="id">Medicamentos (no crónicos)</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Consultas médicas / especialistas</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Exámenes / laboratorios</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Dentista / Ortodoncia</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Mascotas</div>
+<div id="gv-msc">
+  <div class="ir"><span class="id">Comida / alimento para mascota</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Veterinario / vacunas</span><span class="cu">₡</span><input class="ai gf-var" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('gv-msc','gf-var','Otro gasto variable','rcFijo()')">+ Agregar variable</button>
+<div class="ch">Gastos discrecionales</div>
+<div class="sh">Comidas fuera</div>
+<div id="gd-com">
+  <div class="ir"><span class="id">Restaurantes / almuerzos fuera</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Delivery (Uber Eats, Rappi)</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Cafés / snacks / antojos</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Cuidado personal</div>
+<div id="gd-per">
+  <div class="ir"><span class="id">Ropa y calzado</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Peluquería / salón de belleza</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Maquillaje / cosméticos</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Manicure / spa</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Gimnasio / yoga / deportes</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="sh">Entretenimiento</div>
+<div id="gd-ent">
+  <div class="ir"><span class="id">Salidas / cine / teatro</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Viajes / escapadas</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Hobbies / pasatiempos</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Libros / cursos no obligatorios</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Regalos (cumpleaños, fiestas)</span><span class="cu">₡</span><input class="ai gf-disc" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<button class="ab" onclick="ar('gd-ent','gf-disc','Otro discrecional','rcFijo()')">+ Agregar discrecional</button>
+<div class="tot"><span class="tl">Total gastos del mes</span><span class="tv r" id="fi-te">₡0</span></div>`; }
+
+function htmlAhorro() { return `
+<p class="ptitle">Mi ahorro y protección</p>
+<p class="psub">No es un gasto — es dinero que separás para tu futuro y seguridad.</p>
+<div class="ch">Ahorro e inversiones</div>
+<div id="ah-inv">
+  <div class="ir"><span class="id">Ahorro automático mensual</span><span class="cu">₡</span><input class="ai ah-inv" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Inversiones mensuales (fondos SUGEVAL)</span><span class="cu">₡</span><input class="ai ah-inv" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Ahorro para metas específicas</span><span class="cu">₡</span><input class="ai ah-inv" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Aportación voluntaria a pensión (OPC)</span><span class="cu">₡</span><input class="ai ah-inv" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Ahorro en dólares / divisas</span><span class="cu">₡</span><input class="ai ah-inv" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="ch">Fondo de emergencias</div>
+<div id="ah-fnd">
+  <div class="ir"><span class="id">Aporte mensual al fondo de emergencias</span><span class="cu">₡</span><input class="ai ah-fnd" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Reserva para gastos médicos imprevistos</span><span class="cu">₡</span><input class="ai ah-fnd" type="number" value="0" oninput="rcFijo()"></div>
+  <div class="ir"><span class="id">Fondo para reparaciones hogar / auto</span><span class="cu">₡</span><input class="ai ah-fnd" type="number" value="0" oninput="rcFijo()"></div>
+</div>
+<div class="tot"><span class="tl">Total ahorro y protección</span><span class="tv b" id="fi-ts">₡0</span></div>`; }
+
+function htmlFlujoFijo() { return `
+<p class="ptitle">Mi flujo</p>
+<p class="psub">La foto completa de tu dinero cada mes.</p>
+<div class="hero eq" id="fi-hero">
+  <div class="hl" id="fi-hl">Flujo mensual</div>
+  <div class="ha" id="fi-ha">₡0</div>
+  <div class="hm" id="fi-hm">Ingresá tus datos para ver tu flujo.</div>
+</div>
+<div class="fc">
+  <div class="fr"><span class="lb">Ingresos fijos</span><span style="font-weight:500;color:#1D9E75" id="fl-ff">₡0</span></div>
+  <div class="fr"><span class="lb">Ingresos variables</span><span style="font-weight:500;color:#1D9E75" id="fl-fv">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Total ingresos</span><span style="font-weight:500;color:#1D9E75" id="fl-fi">₡0</span></div>
+</div>
+<div class="fc">
+  <div class="fr"><span class="lb">Gastos fijos</span><span style="font-weight:500;color:#E24B4A" id="fl-gf">₡0</span></div>
+  <div class="fr"><span class="lb">Gastos variables</span><span style="font-weight:500;color:#E24B4A" id="fl-gv">₡0</span></div>
+  <div class="fr"><span class="lb">Gastos discrecionales</span><span style="font-weight:500;color:#E24B4A" id="fl-gd">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Total gastos</span><span style="font-weight:500;color:#E24B4A" id="fl-ge">₡0</span></div>
+</div>
+<div class="fc">
+  <div class="fr"><span class="lb">Ahorro e inversiones</span><span style="font-weight:500;color:#378ADD" id="fl-ai">₡0</span></div>
+  <div class="fr"><span class="lb">Fondo de emergencias</span><span style="font-weight:500;color:#378ADD" id="fl-fe">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Total ahorro</span><span style="font-weight:500;color:#378ADD" id="fl-as">₡0</span></div>
+</div>
+<div class="bw"><div class="br"><span>Ingresos</span><span>100%</span></div><div class="bt"><div class="bf i" style="width:100%"></div></div></div>
+<div class="bw"><div class="br"><span>Gastos</span><span id="pe">0%</span></div><div class="bt"><div class="bf e" id="be" style="width:0%"></div></div></div>
+<div class="bw"><div class="br"><span>Ahorro</span><span id="ps">0%</span></div><div class="bt"><div class="bf s" id="bs" style="width:0%"></div></div></div>`; }
+
+// ─── HTML INGRESO MIXTO ────────────────────────────────────
+function htmlPatron() { return `
+<p class="ptitle">Patrón anual de ingresos</p>
+<p class="psub">Tu comportamiento de ingresos durante el año y tu IRC.</p>
+<div class="ib"><div class="il">IRC — Ingreso de Referencia Conservador</div><div class="iv" id="mx-irc">₡0</div><div class="id2">El ingreso que la mayoría de tus meses normales supera. Es tu base de planificación.</div></div>
+<div class="fc" style="margin-bottom:1rem">
+  <div class="fr"><span class="lb">Total ingresos del año</span><span style="font-weight:500;color:#1D9E75" id="mx-tanio">₡0</span></div>
+  <div class="fr"><span class="lb">Mejor mes del año</span><span style="font-weight:500;color:#1D9E75" id="mx-mejor">₡0</span></div>
+  <div class="fr"><span class="lb" style="color:#E24B4A">Mes más bajo del año</span><span style="font-weight:500;color:#E24B4A" id="mx-bajo">₡0</span></div>
+  <div class="fr"><span class="lb">Promedio mensual</span><span style="font-weight:500" id="mx-prom">₡0</span></div>
+  <div class="fr tot2"><span class="lb">IRC — Base de planificación</span><span style="font-weight:500;color:#1D9E75" id="mx-irc2">₡0</span></div>
+</div>
+<div class="fc" style="margin-bottom:1rem">
+  <div class="fr"><span class="lb">Promedio ingresos FIJOS</span><span style="font-weight:500" id="mx-pf">₡0</span></div>
+  <div class="fr"><span class="lb">Promedio ingresos VARIABLES</span><span style="font-weight:500" id="mx-pv">₡0</span></div>
+  <div class="fr"><span class="lb">Promedio ingresos DISCRECIONALES</span><span style="font-weight:500" id="mx-pd">₡0</span></div>
+</div>
+<div class="cw"><div class="ct">Comportamiento anual de ingresos</div><canvas id="irchart" height="140"></canvas></div>
+<div class="ch">Datos del mapa de estacionalidad</div>
+<p style="font-size:12px;color:#888;margin-bottom:.75rem">Trasladá estos valores desde tu Excel.</p>
+<div class="ag">
+  <div class="af"><div class="al">IRC (₡)</div><input class="ainp" id="cfg-irc" type="number" value="0" oninput="rcPatron()"></div>
+  <div class="af"><div class="al">Promedio mensual (₡)</div><input class="ainp" id="cfg-prom" type="number" value="0" oninput="rcPatron()"></div>
+</div>
+<div class="ag">
+  <div class="af"><div class="al">Promedio ingresos fijos (₡)</div><input class="ainp" id="cfg-pf" type="number" value="0" oninput="rcPatron()"></div>
+  <div class="af"><div class="al">Promedio ingresos variables (₡)</div><input class="ainp" id="cfg-pv" type="number" value="0" oninput="rcPatron()"></div>
+</div>
+<div class="ag">
+  <div class="af"><div class="al">Promedio discrecionales (₡)</div><input class="ainp" id="cfg-pd" type="number" value="0" oninput="rcPatron()"></div>
+  <div></div>
+</div>
+<div class="al" style="margin-bottom:.5rem">Ingresos reales por mes (₡)</div>
+<div class="mg">
+  ${MESES.map(function(m,i){return '<div class="mf"><div class="ml">'+m+'</div><input class="mi" id="m'+i+'" type="number" value="0" oninput="rcPatron()"></div>';}).join('')}
+</div>`; }
+
+function htmlMes() { return `
+<p class="ptitle">Mes actual</p>
+<p class="psub">Ingresá los datos reales de este mes.</p>
+<div class="ib"><div class="il">IRC — Ingreso de Referencia Conservador</div><div class="iv" id="mx-irc-mes">₡0</div><div class="id2">Tu ingreso base de planificación.</div></div>
+<div class="ch">Ingresos fijos</div>
+<div id="mx-fi">
+  <div class="ir"><span class="id">Salario / Empleo principal (neto)</span><span class="cu">₡</span><input class="ai mx-fijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Pensión alimenticia que recibo</span><span class="cu">₡</span><input class="ai mx-fijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Alquiler de propiedad</span><span class="cu">₡</span><input class="ai mx-fijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Apoyo de familia (regular)</span><span class="cu">₡</span><input class="ai mx-fijo" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="ch">Ingresos variables</div>
+<div id="mx-va">
+  <div class="ir"><span class="id">Negocio propio — ventas del mes</span><span class="cu">₡</span><input class="ai mx-var" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Freelance / Servicios independientes</span><span class="cu">₡</span><input class="ai mx-var" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Comisiones / Bonos</span><span class="cu">₡</span><input class="ai mx-var" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Proyectos / Consultorías</span><span class="cu">₡</span><input class="ai mx-var" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="ch">Ingresos esporádicos</div>
+<div id="mx-es">
+  <div class="ir"><span class="id">Bono / Aguinaldo / Extra</span><span class="cu">₡</span><input class="ai mx-esp" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Venta de activos o bienes</span><span class="cu">₡</span><input class="ai mx-esp" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="tot"><span class="tl">Total ingresos del mes</span><span class="tv g" id="mx-ti">₡0</span></div>
+<div class="ch" style="margin-top:1.5rem">Gastos fijos</div>
+<div class="sh">Vivienda y servicios</div>
+<div id="mx-gfv">
+  <div class="ir"><span class="id">Renta o pago de hipoteca</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Electricidad</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Agua</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Internet</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Teléfono celular</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Cable / Streaming</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="sh">Transporte fijo</div>
+<div id="mx-gft">
+  <div class="ir"><span class="id">Crédito del auto</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Seguro del auto (INS)</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Marchamo (COSEVI)</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="sh">Pagos de deudas</div>
+<div id="mx-gfd">
+  <div class="ir"><span class="id">Tarjeta de crédito 1</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 2</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 3</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Préstamo personal</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Préstamo de vehículo</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Hipoteca</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="sh">Familia y salud fija</div>
+<div id="mx-gff">
+  <div class="ir"><span class="id">Colegiatura / Guardería</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Pensión alimenticia que pago</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Seguro médico privado (INS)</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Terapia / Psicólogo</span><span class="cu">₡</span><input class="ai mx-gfijo" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<button class="ab" onclick="ar('mx-gff','mx-gfijo','Otro gasto fijo','rcMes()')">+ Agregar fijo</button>
+<div class="ch">Gastos variables</div>
+<div id="mx-gvv">
+  <div class="ir"><span class="id">Supermercado / Despensa</span><span class="cu">₡</span><input class="ai mx-gvar" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Gasolina / Transporte público</span><span class="cu">₡</span><input class="ai mx-gvar" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Medicamentos / Consultas</span><span class="cu">₡</span><input class="ai mx-gvar" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Útiles / Actividades escolares</span><span class="cu">₡</span><input class="ai mx-gvar" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Productos limpieza e higiene</span><span class="cu">₡</span><input class="ai mx-gvar" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<button class="ab" onclick="ar('mx-gvv','mx-gvar','Otro gasto variable','rcMes()')">+ Agregar variable</button>
+<div class="ch">Gastos discrecionales</div>
+<div id="mx-gdd">
+  <div class="ir"><span class="id">Restaurantes / delivery</span><span class="cu">₡</span><input class="ai mx-gdisc" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Ropa / belleza / cuidado personal</span><span class="cu">₡</span><input class="ai mx-gdisc" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Entretenimiento / salidas</span><span class="cu">₡</span><input class="ai mx-gdisc" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<button class="ab" onclick="ar('mx-gdd','mx-gdisc','Otro discrecional','rcMes()')">+ Agregar discrecional</button>
+<div class="tot"><span class="tl">Total gastos del mes</span><span class="tv r" id="mx-te">₡0</span></div>
+<div class="ch" style="margin-top:1.5rem">Ahorro y protección</div>
+<div id="mx-ah">
+  <div class="ir"><span class="id">Ahorro automático mensual</span><span class="cu">₡</span><input class="ai mx-aho" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Inversiones mensuales</span><span class="cu">₡</span><input class="ai mx-aho" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Fondo de emergencias (aporte)</span><span class="cu">₡</span><input class="ai mx-aho" type="number" value="0" oninput="rcMes()"></div>
+  <div class="ir"><span class="id">Fondo de nivelación (aporte)</span><span class="cu">₡</span><input class="ai mx-aho" type="number" value="0" oninput="rcMes()"></div>
+</div>
+<div class="tot"><span class="tl">Total ahorro y protección</span><span class="tv b" id="mx-ts">₡0</span></div>
+<div class="fc" style="margin-top:1.5rem">
+  <div class="fr"><span class="lb">Total ingresos</span><span style="font-weight:500;color:#1D9E75" id="mx-fli">₡0</span></div>
+  <div class="fr"><span class="lb">Total gastos</span><span style="font-weight:500;color:#E24B4A" id="mx-fle">₡0</span></div>
+  <div class="fr"><span class="lb">Total ahorro y protección</span><span style="font-weight:500;color:#378ADD" id="mx-fls">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Flujo final del mes</span><span style="font-weight:500" id="mx-fln">₡0</span></div>
+  <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0">
+    <span style="font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px">¿Qué significa? </span>
+    <span style="font-size:12px;color:#888;font-style:italic" id="mx-flsig">Ingresá tus datos para ver el resultado.</span>
+  </div>
+</div>`; }
+
+function htmlFlujoMixto() { return `
+<p class="ptitle">Mi flujo — 3 escenarios</p>
+<p class="psub">La regla de oro: en los meses buenos no vivís mejor — te preparás para los meses malos.</p>
+<div class="eg">
+  <div class="ec">
+    <div class="eh bajo">Mes bajo</div>
+    <div class="er"><span>Ingresos</span><span class="ev" id="eb-i">₡0</span></div>
+    <div class="er"><span>Gastos fijos</span><span class="ev" id="eb-gf">₡0</span></div>
+    <div class="er"><span>Gastos variables</span><span class="ev" id="eb-gv">₡0</span></div>
+    <div class="er"><span>Gastos discr.</span><span class="ev" id="eb-gd">₡0</span></div>
+    <div class="er"><span>Ahorro</span><span class="ev">₡0</span></div>
+    <div class="en"><span>Flujo final</span><span id="eb-n" style="color:#E24B4A">₡0</span></div>
+    <div class="es" id="eb-s">—</div>
+  </div>
+  <div class="ec">
+    <div class="eh medio">Mes medio</div>
+    <div class="er"><span>Ingresos (IRC)</span><span class="ev" id="em-i">₡0</span></div>
+    <div class="er"><span>Gastos fijos</span><span class="ev" id="em-gf">₡0</span></div>
+    <div class="er"><span>Gastos variables</span><span class="ev" id="em-gv">₡0</span></div>
+    <div class="er"><span>Gastos discr.</span><span class="ev" id="em-gd">₡0</span></div>
+    <div class="er"><span>Ahorro</span><span class="ev" id="em-s">₡0</span></div>
+    <div class="en"><span>Flujo final</span><span id="em-n" style="color:#BA7517">₡0</span></div>
+    <div class="es" id="em-sg">—</div>
+  </div>
+  <div class="ec">
+    <div class="eh alto">Mes alto</div>
+    <div class="er"><span>Ingresos reales</span><span class="ev" id="ea-i">₡0</span></div>
+    <div class="er"><span>Gastos fijos</span><span class="ev" id="ea-gf">₡0</span></div>
+    <div class="er"><span>Gastos variables</span><span class="ev" id="ea-gv">₡0</span></div>
+    <div class="er"><span>Gastos discr.</span><span class="ev" id="ea-gd">₡0</span></div>
+    <div class="er"><span>Ahorro</span><span class="ev" id="ea-s">₡0</span></div>
+    <div class="en"><span>Flujo final</span><span id="ea-n" style="color:#1D9E75">₡0</span></div>
+    <div class="es" id="ea-sg">—</div>
+  </div>
+</div>
+<div class="regla">Regla de oro: En los meses buenos no vivís mejor — te preparás para los meses malos. Usá el IRC como base de todos tus cálculos.</div>`; }
+
+function htmlEcuacion() { return `
+<p class="ptitle">Ecuación contable</p>
+<p class="psub">Activos − Pasivos = Patrimonio Neto.</p>
+<div class="ch">Mis activos — lo que TENGO</div>
+<div class="sh">Efectivo y cuentas bancarias</div>
+<div id="ac-ef">
+  <div class="ir"><span class="id">Efectivo en casa</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Cuenta de ahorro — banco 1</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Cuenta de ahorro — banco 2</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Cuenta corriente</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+</div>
+<div class="sh">Inversiones</div>
+<div id="ac-in">
+  <div class="ir"><span class="id">Certificados a plazo (CDPs)</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Fondos de inversión (SAFIs)</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Acciones en bolsa</span><span class="cu">₡</span><input class="ai ac-co" type="number" value="0" oninput="rcEc()"></div>
+</div>
+<button class="ab" onclick="ar('ac-in','ac-co','Otra inversión líquida','rcEc()')">+ Agregar activo líquido</button>
+<div class="sh" style="margin-top:.75rem">Activos no corrientes</div>
+<div id="ac-nc">
+  <div class="ir"><span class="id">OPC / Pensión complementaria (ROP)</span><span class="cu">₡</span><input class="ai ac-nc" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Casa / Departamento donde vivo</span><span class="cu">₡</span><input class="ai ac-nc" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Segunda propiedad / Terreno</span><span class="cu">₡</span><input class="ai ac-nc" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Auto (valor de mercado)</span><span class="cu">₡</span><input class="ai ac-nc" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Joyería de valor (más de ₡500,000)</span><span class="cu">₡</span><input class="ai ac-nc" type="number" value="0" oninput="rcEc()"></div>
+</div>
+<button class="ab" onclick="ar('ac-nc','ac-nc','Otro activo fijo','rcEc()')">+ Agregar activo fijo</button>
+<div class="tot"><span class="tl">Total activos</span><span class="tv g" id="ec-ta">₡0</span></div>
+<div class="ch" style="margin-top:1.5rem">Mis pasivos — lo que DEBO</div>
+<div class="sh">Pasivos circulantes — menos de 1 año</div>
+<div id="pa-ci">
+  <div class="ir"><span class="id">Tarjeta de crédito 1</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 2</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Tarjeta de crédito 3</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Tarjeta departamental</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">App micropréstamo (Tala, Vivus)</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Préstamo familiar (corto plazo)</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Compras a meses sin intereses</span><span class="cu">₡</span><input class="ai pa-ci" type="number" value="0" oninput="rcEc()"></div>
+</div>
+<button class="ab" onclick="ar('pa-ci','pa-ci','Otra deuda corto plazo','rcEc()')">+ Agregar circulante</button>
+<div class="sh" style="margin-top:.75rem">Pasivos fijos — más de 1 año</div>
+<div id="pa-fi">
+  <div class="ir"><span class="id">Hipoteca (saldo pendiente)</span><span class="cu">₡</span><input class="ai pa-fi" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Crédito automotriz</span><span class="cu">₡</span><input class="ai pa-fi" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Préstamo personal bancario</span><span class="cu">₡</span><input class="ai pa-fi" type="number" value="0" oninput="rcEc()"></div>
+  <div class="ir"><span class="id">Crédito educativo</span><span class="cu">₡</span><input class="ai pa-fi" type="number" value="0" oninput="rcEc()"></div>
+</div>
+<button class="ab" onclick="ar('pa-fi','pa-fi','Otra deuda largo plazo','rcEc()')">+ Agregar fijo</button>
+<div class="tot"><span class="tl">Total pasivos</span><span class="tv r" id="ec-tp">₡0</span></div>
+<div class="peq" style="margin-top:1.5rem">
+  <div class="pb"><div class="pl">Activos</div><div class="pv g" id="bal-a">₡0</div></div>
+  <div class="po">−</div>
+  <div class="pb"><div class="pl">Pasivos</div><div class="pv r" id="bal-p">₡0</div></div>
+  <div class="po">=</div>
+  <div class="pb"><div class="pl">Patrimonio</div><div class="pv g" id="bal-pt">₡0</div></div>
+</div>
+<div class="pr">
+  <div class="pg2" id="bal-n" style="color:#085041">₡0</div>
+  <div class="pm" id="bal-m">Ingresá tus activos y pasivos para ver tu patrimonio.</div>
+</div>
+<div class="fc">
+  <div class="fr"><span class="lb">Activos corrientes</span><span style="font-weight:500;color:#1D9E75" id="bal-ac">₡0</span></div>
+  <div class="fr"><span class="lb">Activos no corrientes</span><span style="font-weight:500;color:#1D9E75" id="bal-anc">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Total activos</span><span style="font-weight:500;color:#1D9E75" id="bal-ta">₡0</span></div>
+</div>
+<div class="fc">
+  <div class="fr"><span class="lb">Pasivos circulantes</span><span style="font-weight:500;color:#E24B4A" id="bal-pc">₡0</span></div>
+  <div class="fr"><span class="lb">Pasivos fijos</span><span style="font-weight:500;color:#E24B4A" id="bal-pf">₡0</span></div>
+  <div class="fr tot2"><span class="lb">Total pasivos</span><span style="font-weight:500;color:#E24B4A" id="bal-tp">₡0</span></div>
+</div>`; }
+
+// ─── SESIÓN 3 ─────────────────────────────────────────────
+function buildSess3() {
+  var adminEl = document.getElementById('s3admin');
+  adminEl.innerHTML = buildS3AdminHTML();
+}
+
+function buildS3AdminHTML() {
+  var rows = INDS.map(function(ind, i) {
+    return '<div class="iap">'+
+      '<div class="iaprow"><div class="nb">'+ind.n+'</div><span style="font-size:13px;font-weight:500">'+ind.nm+'</span><span style="font-size:11px;color:#aaa;margin-left:auto">'+ind.rng+'</span></div>'+
+      '<div class="ag"><div class="af"><div class="al">Resultado</div><input class="ainp" id="ar'+i+'" type="text" placeholder="Ej: 96.3%"></div>'+
+      '<div class="af"><div class="al">Semáforo</div><select class="asel" id="as'+i+'"><option value="verde">Saludable</option><option value="amarillo">Precaución</option><option value="rojo">Atención urgente</option><option value="gris">Sin dato</option></select></div></div>'+
+      '<div class="af"><div class="al">Interpretación</div><textarea class="ata" id="ai'+i+'" placeholder="Escribí tu interpretación para esta clienta..."></textarea></div>'+
+    '</div>';
+  }).join('');
+
+  var tipoLabel = TIPO==='fijo' ? 'Fijo' : TIPO==='mixto' ? 'Mixto / Variable — usando IRC' : 'Variable — usando IRC';
+
+  return '<div class="adm">'+
+    '<div class="admbar">Panel de consultora — Completá los indicadores para esta clienta.</div>'+
+    '<div class="admsec"><div class="admtit">Configuración de indicadores</div>'+
+    '<div class="ag">'+
+      '<div class="af"><div class="al">Perfil detectado</div><input class="ainp" id="cfg-perfil" type="text" value="'+tipoLabel+'"></div>'+
+      '<div class="af"><div class="al">Ingreso base para ratios (₡)</div><input class="ainp" id="cfg-ibase" type="number" value="0"></div>'+
+    '</div>'+
+    (TIPO!=='fijo' ? '<div class="ag"><div class="af"><div class="al">IRC (₡)</div><input class="ainp" id="cfg-ircs3" type="number" value="0"></div><div></div></div>' : '')+
+    '</div>'+
+    rows+
+    '<button class="apbtn" onclick="applyS3()">Guardar y mostrar a clienta</button></div>';
+}
+
+function applyS3() {
+  var perfil = document.getElementById('cfg-perfil').value;
+  var base = parseFloat(document.getElementById('cfg-ibase').value)||0;
+  var showIrc = TIPO !== 'fijo';
+  var ircVal = showIrc ? (parseFloat(document.getElementById('cfg-ircs3').value)||0) : 0;
+
+  var html = '<div class="pg" style="display:block">'+
+    '<p class="ptitle" style="margin-bottom:.5rem">Mis indicadores financieros</p>'+
+    '<div class="pbar">'+
+      '<span class="plb">Perfil:</span><span class="pmv">'+perfil+'</span>'+
+      (showIrc ? '<span class="pirclb">IRC:</span><span class="pirc">'+fmt(ircVal)+'</span><span class="pirclb" style="margin-left:12px">Ingreso base:</span><span class="pirc">'+fmt(base)+'</span>' : '')+
+    '</div>';
+
+  INDS.forEach(function(ind, i) {
+    var res = document.getElementById('ar'+i).value || '—';
+    var sem = document.getElementById('as'+i).value;
+    var interp = document.getElementById('ai'+i).value;
+    var c = COLS[sem];
+    html += '<div class="icard">'+
+      '<div class="itop">'+
+        '<div class="ic"><div class="icl">Indicador</div><div class="inn"><span class="nb">'+ind.n+'</span>'+ind.nm+'</div></div>'+
+        '<div class="ic"><div class="icl">Resultado</div><div style="font-size:15px;font-weight:500">'+res+'</div></div>'+
+        '<div class="ic"><div class="icl">Rango saludable</div><div style="font-size:12px;color:#888">'+ind.rng+'</div></div>'+
+        '<div class="ic"><div class="icl">Semáforo</div><div class="sr"><div class="sd" style="background:'+c.bg+'"></div><span style="font-size:12px;font-weight:500;color:'+c.tx+'">'+c.lb+'</span></div></div>'+
+      '</div>'+
+      '<div class="ibot"><div class="iil">Interpretación</div><div class="iit">'+interp+'</div></div>'+
+    '</div>';
+  });
+
+  html += '</div>';
+
+  document.getElementById('s3admin').style.display = 'none';
+  document.getElementById('s3locked').style.display = 'none';
+  var clientEl = document.getElementById('s3client');
+  clientEl.innerHTML = html;
+  clientEl.style.display = 'block';
+}
+
+// ─── CÁLCULOS FIJO ────────────────────────────────────────
+function rcFijo() {
+  var ff=s('fi-fijo'), fv=s('fi-var'), inc=ff+fv;
+  var gf=s('gf-fijo'), gv=s('gf-var'), gd=s('gf-disc'), exp=gf+gv+gd;
+  var ai=s('ah-inv'), fe=s('ah-fnd'), sav=ai+fe;
+  var net=inc-exp-sav;
+  st('fi-ti',fmt(inc)); st('fi-te',fmt(exp)); st('fi-ts',fmt(sav));
+  st('fl-ff',fmt(ff)); st('fl-fv',fmt(fv)); st('fl-fi',fmt(inc));
+  st('fl-gf',fmt(gf)); st('fl-gv',fmt(gv)); st('fl-gd',fmt(gd)); st('fl-ge',fmt(exp));
+  st('fl-ai',fmt(ai)); st('fl-fe',fmt(fe)); st('fl-as',fmt(sav));
+  var h=g('fi-hero'); if(!h) return;
+  if(net>0){h.className='hero sup';st('fi-hl','Superávit mensual');st('fi-ha',fmt(net));st('fi-hm','Te está sobrando dinero cada mes. Esto es una oportunidad para construir tu futuro.');}
+  else if(net<0){h.className='hero def';st('fi-hl','Déficit mensual');st('fi-ha',fmt(Math.abs(net)));st('fi-hm','Estás gastando más de lo que ingresa. Juntas vamos a encontrar de dónde viene esto.');}
+  else{h.className='hero eq';st('fi-hl','Equilibrio');st('fi-ha','₡0');st('fi-hm','Tus ingresos y salidas son exactamente iguales.');}
+  var pe=inc>0?Math.min(100,Math.round(exp/inc*100)):0;
+  var ps=inc>0?Math.min(100,Math.round(sav/inc*100)):0;
+  st('pe',pe+'%'); st('ps',ps+'%');
+  var be=g('be'), bs=g('bs');
+  if(be) be.style.width=pe+'%'; if(bs) bs.style.width=ps+'%';
+}
+
+// ─── CÁLCULOS MIXTO ───────────────────────────────────────
+function rcPatron() {
+  IRC = parseFloat((g('cfg-irc')||{}).value)||0;
+  var meses=[];
+  for(var i=0;i<12;i++) meses.push(parseFloat((g('m'+i)||{}).value)||0);
+  var total=meses.reduce(function(a,b){return a+b;},0);
+  var nonZero=meses.filter(function(v){return v>0;});
+  var mejor=nonZero.length?Math.max.apply(null,nonZero):0;
+  var peor=nonZero.length?Math.min.apply(null,nonZero):0;
+  var prom=parseFloat((g('cfg-prom')||{}).value)||0;
+  var pf=parseFloat((g('cfg-pf')||{}).value)||0;
+  var pv=parseFloat((g('cfg-pv')||{}).value)||0;
+  var pd=parseFloat((g('cfg-pd')||{}).value)||0;
+  st('mx-irc',fmt(IRC)); st('mx-irc2',fmt(IRC)); st('mx-irc-mes',fmt(IRC));
+  st('mx-tanio',fmt(total)); st('mx-mejor',fmt(mejor)); st('mx-bajo',fmt(peor));
+  st('mx-prom',fmt(prom)); st('mx-pf',fmt(pf)); st('mx-pv',fmt(pv)); st('mx-pd',fmt(pd));
+  buildIRChart(meses, IRC);
+  rcMes();
+}
+
+function buildIRChart(meses, irc) {
+  var canvas = g('irchart'); if(!canvas) return;
+  if(CHART) CHART.destroy();
+  CHART = new Chart(canvas.getContext('2d'), {
+    type:'bar',
+    data:{
+      labels:MESES,
+      datasets:[
+        {label:'Ingresos',data:meses,backgroundColor:meses.map(function(v){return v>=irc*1.15?'#1D9E75':v>=irc*0.85?'#EF9F27':'#E24B4A';}),borderRadius:4,borderSkipped:false},
+        {type:'line',label:'IRC',data:Array(12).fill(irc),borderColor:'#085041',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false}
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return fmt(c.raw);}}}},scales:{y:{ticks:{callback:function(v){return '₡'+v.toLocaleString('es-CR');}},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}}
+  });
+}
+
+function rcMes() {
+  var inc=s('mx-fijo')+s('mx-var')+s('mx-esp');
+  var gf=s('mx-gfijo'), gv=s('mx-gvar'), gd=s('mx-gdisc'), exp=gf+gv+gd;
+  var sav=s('mx-aho'), net=inc-exp-sav;
+  st('mx-ti',fmt(inc)); st('mx-te',fmt(exp)); st('mx-ts',fmt(sav));
+  st('mx-fli',fmt(inc)); st('mx-fle',fmt(exp)); st('mx-fls',fmt(sav));
+  var netEl=g('mx-fln'); if(netEl){netEl.textContent=fmt(net);netEl.style.color=net>=0?'#1D9E75':'#E24B4A';}
+  var sig = net>0 ? (inc>=IRC*1.15?'Mes alto — excedente de '+fmt(net)+'. Alimentá el Fondo de Nivelación.':'Estás en equilibrio positivo. Ejecutá el plan normal.')
+            : net<0 ? 'Déficit de '+fmt(Math.abs(net))+' — activá el Fondo de Nivelación.'
+            : 'Equilibrio exacto. Considerá ajustar para crear un colchón.';
+  st('mx-flsig', sig);
+  // Escenarios
+  var bajo=IRC*0.8, med=IRC, alto=inc;
+  [[bajo,'eb'],[med,'em'],[alto,'ea']].forEach(function(r,i){
+    var sinc=r[0], id=r[1], n2=sinc-gf-gv-gd-sav;
+    st(id+'-i',fmt(sinc)); st(id+'-gf',fmt(gf)); st(id+'-gv',fmt(gv)); st(id+'-gd',fmt(gd));
+    if(id==='em'||id==='ea') st(id+'-s',fmt(sav));
+    var ne=g(id+'-n'); if(ne){ne.textContent=fmt(n2);ne.style.color=n2>=0?'#1D9E75':'#E24B4A';}
+    var sg=g(id+'-sg')||g(id+'-s');
+    var sgEl = g(id==='eb'?'eb-s':id==='em'?'em-sg':'ea-sg');
+    if(sgEl) sgEl.textContent = n2>0?(i===2?'Excedente → alimentá el Fondo de Nivelación':'Estás en equilibrio')
+                                     :n2<0?'Activá el Fondo de Nivelación':'Equilibrio exacto';
+  });
+}
+
+// ─── CÁLCULOS ECUACIÓN ────────────────────────────────────
+function rcEc() {
+  var ac=s('ac-co'), anc=s('ac-nc'), ta=ac+anc;
+  var pc=s('pa-ci'), pf=s('pa-fi'), tp=pc+pf;
+  var pat=ta-tp;
+  st('ec-ta',fmt(ta)); st('ec-tp',fmt(tp));
+  st('bal-a',fmt(ta)); st('bal-p',fmt(tp));
+  var ptEl=g('bal-pt'); if(ptEl){ptEl.textContent=fmt(pat);ptEl.className='pv '+(pat>=0?'g':'r');}
+  var nEl=g('bal-n'); if(nEl){nEl.textContent=fmt(pat);nEl.style.color=pat>=0?'#085041':'#791F1F';}
+  st('bal-ac',fmt(ac)); st('bal-anc',fmt(anc)); st('bal-ta',fmt(ta));
+  st('bal-pc',fmt(pc)); st('bal-pf',fmt(pf)); st('bal-tp',fmt(tp));
+  st('bal-m', pat>0?'Tu patrimonio neto es positivo. Tenés más de lo que debés.':pat<0?'Tu patrimonio neto es negativo. Debés más de lo que tenés. Esto no es permanente — con un plan lo trabajamos juntas.':'Tus activos y pasivos son iguales.');
+}
+</script>
+</body>
+</html>

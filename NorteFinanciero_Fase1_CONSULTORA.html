@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norte Financiero — Fase 1 | Consultora</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f5f5f2;color:#1a1a1a;min-height:100vh}
+.app{max-width:900px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,0.08)}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.5rem;border-bottom:1px solid #e8e8e8;background:#fff;position:sticky;top:0;z-index:10}
+.logo{font-family:'Lora',serif;font-size:18px;color:#1a1a1a}.logo span{color:#1D9E75}
+.nav-right{display:flex;align-items:center;gap:10px}
+.badge{font-size:11px;font-weight:500;background:#E1F5EE;color:#0F6E56;padding:4px 12px;border-radius:20px}
+.fase-badge{font-size:10px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+
+/* SESIONES NAV */
+.sessions-nav{display:flex;border-bottom:1px solid #e8e8e8;background:#fff;overflow-x:auto}
+.sess-btn{display:flex;flex-direction:column;align-items:center;padding:.875rem 1.25rem;cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .2s;min-width:120px;gap:3px;font-family:'Inter',sans-serif}
+.sess-btn.act{border-bottom-color:#1D9E75}
+.sess-btn.locked{cursor:default;opacity:.5}
+.sess-num{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888}
+.sess-btn.act .sess-num{color:#1D9E75}
+.sess-name{font-size:12px;font-weight:500;color:#888}
+.sess-btn.act .sess-name{color:#1a1a1a}
+.sess-lock{font-size:14px}
+
+/* CONTENT */
+.content{padding:1.5rem}
+.stitle{font-family:'Lora',serif;font-size:21px;font-weight:400;margin-bottom:4px}
+.ssub{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.6}
+.cat-head{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:#888;margin:1.1rem 0 6px;padding-bottom:4px;border-bottom:1px solid #e8e8e8}
+.sub-head{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin:.6rem 0 4px}
+.irow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 12px;margin-bottom:6px;transition:border-color .2s}
+.irow:focus-within{border-color:#1D9E75}
+.idesc{font-size:13px;color:#1a1a1a;flex:1}
+.cur{font-size:11px;color:#888;font-weight:500}
+.ainput{font-size:14px;font-weight:500;color:#1a1a1a;border:none;background:transparent;text-align:right;width:115px;outline:none;font-family:'Inter',sans-serif}
+.tot{background:#fafaf8;border:1px solid #e8e8e8;border-radius:10px;padding:.875rem 1.1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between}
+.tlabel{font-size:12px;font-weight:500;color:#888}
+.tamt{font-size:20px;font-weight:500}
+.tamt.g{color:#1D9E75}.tamt.r{color:#E24B4A}.tamt.b{color:#378ADD}
+.addbtn{font-size:12px;color:#1D9E75;border:1px dashed #5DCAA5;background:transparent;border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-top:5px;font-family:'Inter',sans-serif}
+.addbtn:hover{background:#E1F5EE}
+.hidden{display:none}
+
+/* SUB-TABS */
+.sub-tabs{display:flex;gap:6px;padding:.875rem 1.5rem;background:#fafaf8;border-bottom:1px solid #e8e8e8;overflow-x:auto;flex-wrap:wrap}
+.stab{font-size:11px;color:#888;padding:5px 14px;border-radius:20px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;white-space:nowrap;transition:all .2s;font-family:'Inter',sans-serif}
+.stab.act{background:#1D9E75;color:#fff;border-color:#1D9E75}
+
+/* CARDS Y FLUJO */
+.hero{border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.25rem;border:1px solid}
+.hero.sup{background:#E1F5EE;border-color:#9FE1CB}
+.hero.def{background:#FCEBEB;border-color:#F7C1C1}
+.hero.eq{background:#E6F1FB;border-color:#B5D4F4}
+.hlabel{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.hero.sup .hlabel{color:#0F6E56}.hero.def .hlabel{color:#A32D2D}.hero.eq .hlabel{color:#185FA5}
+.hamt{font-family:'Lora',serif;font-size:34px}
+.hero.sup .hamt{color:#085041}.hero.def .hamt{color:#791F1F}.hero.eq .hamt{color:#0C447C}
+.hmsg{font-size:12px;margin-top:5px;line-height:1.5}
+.hero.sup .hmsg{color:#0F6E56}.hero.def .hmsg{color:#993C1D}.hero.eq .hmsg{color:#185FA5}
+.fcard{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1rem;margin-bottom:10px}
+.frow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
+.frow:last-child{border-bottom:none}
+.frow .lbl{color:#888}
+.frow.total{padding-top:8px;border-top:1px solid #e8e8e8;border-bottom:none}
+.frow.total .lbl{font-weight:500;color:#1a1a1a}
+.bwrap{margin:.6rem 0}
+.blrow{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px}
+.btrack{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px;transition:width .5s ease}
+.bfill.inc{background:#1D9E75}.bfill.exp{background:#D85A30}.bfill.sav{background:#378ADD}
+.irc-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:.875rem 1.1rem;margin-bottom:1.25rem}
+.irc-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#0F6E56;margin-bottom:3px}
+.irc-val{font-family:'Lora',serif;font-size:26px;color:#085041}
+.irc-desc{font-size:11px;color:#0F6E56;margin-top:3px;line-height:1.5}
+.chart-wrap{background:#fafaf8;border:1px solid #e8e8e8;border-radius:10px;padding:1rem;margin-bottom:1.25rem}
+.chart-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:.75rem}
+.esc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.esc-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.875rem}
+.esc-head{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #f0f0f0}
+.esc-head.bajo{color:#A32D2D}.esc-head.medio{color:#BA7517}.esc-head.alto{color:#1D9E75}
+.esc-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:#888}
+.esc-row .ev{font-weight:500;color:#1a1a1a}
+.esc-net{margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;font-size:12px;font-weight:500}
+.esc-sig{margin-top:4px;font-size:10px;color:#888;font-style:italic}
+.regla{background:#FFF8E1;border:1px solid #FAC775;border-radius:8px;padding:.75rem 1rem;font-size:12px;color:#633806;line-height:1.5;margin-top:1rem}
+.pat-eq{display:flex;align-items:center;justify-content:center;gap:10px;padding:1.1rem;background:#fafaf8;border-radius:10px;border:1px solid #e8e8e8;margin-bottom:1.25rem;flex-wrap:wrap}
+.pat-box{text-align:center;padding:.5rem .75rem}
+.pat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.pat-val{font-size:18px;font-weight:500}
+.pat-val.g{color:#1D9E75}.pat-val.r{color:#E24B4A}
+.pat-op{font-size:20px;color:#ccc;font-weight:300}
+.pat-result{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1.1rem;margin-bottom:1.25rem}
+.pat-big{font-family:'Lora',serif;font-size:30px;text-align:center;margin-bottom:5px}
+.pat-msg{font-size:12px;color:#888;text-align:center;line-height:1.5}
+
+/* INDICADORES */
+.perfil-bar{display:flex;align-items:center;gap:6px;padding:.75rem 1rem;background:#fafaf8;border-radius:8px;margin-bottom:1.25rem;border:1px solid #e8e8e8;flex-wrap:wrap}
+.perfil-lbl{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.meta-val{font-size:13px;font-weight:500;color:#1D9E75}
+.irc-meta{font-size:13px;font-weight:500;color:#1a1a1a}
+.irc-meta-lbl{font-size:11px;color:#888;white-space:nowrap;margin-left:12px}
+.ind-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.ind-top{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;border-bottom:1px solid #f0f0f0}
+.ind-cell{padding:.75rem 1rem;border-right:1px solid #f0f0f0}
+.ind-cell:last-child{border-right:none}
+.ind-cell-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:4px}
+.num-b{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f0f0f0;font-size:11px;font-weight:500;color:#888;margin-right:7px;flex-shrink:0}
+.ind-nombre{display:flex;align-items:center;font-size:13px;font-weight:500;color:#1a1a1a}
+.sem-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.sem-row{display:flex;align-items:center;gap:8px}
+.ind-bottom{padding:.75rem 1rem;background:#fafafa}
+.ind-interp-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:5px}
+.ind-interp{font-size:13px;color:#444;line-height:1.6;font-style:italic;min-height:18px}
+
+/* SESIÓN BLOQUEADA */
+.locked-view{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center}
+.lock-circle{width:64px;height:64px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;font-size:28px}
+.lock-title{font-family:'Lora',serif;font-size:20px;margin-bottom:.5rem;color:#1a1a1a}
+.lock-sub{font-size:13px;color:#888;line-height:1.6;max-width:300px}
+.lock-dots{display:flex;gap:6px;margin-top:1.5rem}
+.lock-dot{width:8px;height:8px;border-radius:50%;background:#e8e8e8}
+.lock-dot.done{background:#1D9E75}
+
+/* PANEL CONSULTORA */
+.pw-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center}
+.pw-box{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;margin:1rem}
+.pw-title{font-family:'Lora',serif;font-size:18px;margin-bottom:.35rem}
+.pw-sub{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.5}
+.pw-input{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;width:100%;margin-bottom:.75rem}
+.pw-input:focus{border-color:#1D9E75}
+.pw-err{font-size:12px;color:#E24B4A;margin-bottom:.75rem;display:none}
+.pw-btn{width:100%;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;margin-bottom:.5rem}
+.pw-btn:hover{background:#0F6E56}
+.pw-cancel{width:100%;font-size:12px;font-family:'Inter',sans-serif;background:transparent;color:#888;border:none;cursor:pointer;padding:6px}
+
+/* PANEL ADMIN INDICADORES */
+.admin-bar{padding:.75rem 1rem;background:#FFF8E1;border:1px solid #FAC775;border-radius:8px;font-size:12px;color:#633806;margin-bottom:1.25rem}
+.admin-section{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.admin-section-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #f0f0f0}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem}
+.admin-field{display:flex;flex-direction:column;gap:3px}
+.admin-label{font-size:11px;color:#888;margin-bottom:2px}
+.admin-input{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:6px 10px;outline:none;width:100%}
+.admin-input:focus{border-color:#1D9E75}
+.admin-select{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:6px 10px;outline:none;width:100%;cursor:pointer;background:#fff}
+.admin-interp{font-size:13px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:8px 10px;outline:none;width:100%;resize:vertical;min-height:55px;line-height:1.5}
+.admin-interp:focus{border-color:#1D9E75}
+.ind-admin-panel{background:#fafaf8;border:1px solid #e8e8e8;border-radius:8px;padding:1rem;margin-bottom:8px}
+.ind-admin-header{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.ind-num{width:22px;height:22px;border-radius:50%;background:#e8e8e8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#888;flex-shrink:0}
+.apply-btn{font-size:12px;font-weight:500;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:9px 24px;cursor:pointer;font-family:'Inter',sans-serif;margin-top:.5rem;width:100%}
+.apply-btn:hover{background:#0F6E56}
+.meses-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:.5rem}
+.mes-field{display:flex;flex-direction:column;gap:2px}
+.mes-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+.mes-input{font-size:12px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:6px;padding:5px 8px;outline:none;width:100%}
+.mes-input:focus{border-color:#1D9E75}
+
+/* SETUP SCREEN */
+.setup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(245,245,242,0.97);z-index:300;display:flex;align-items:center;justify-content:center}
+.setup-box{background:#fff;border-radius:16px;border:1px solid #e8e8e8;padding:2rem;width:100%;max-width:420px;margin:1rem}
+.setup-logo{font-family:'Lora',serif;font-size:22px;margin-bottom:4px}
+.setup-logo span{color:#1D9E75}
+.setup-sub{font-size:12px;color:#888;margin-bottom:1.75rem}
+.setup-field{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem}
+.setup-label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.setup-input{font-size:14px;font-family:'Inter',sans-serif;border:1px solid #e8e8e8;border-radius:8px;padding:9px 12px;outline:none;width:100%}
+.setup-input:focus{border-color:#1D9E75}
+.tipo-grid{display:flex;gap:8px}
+.tipo-btn{flex:1;font-size:13px;font-family:'Inter',sans-serif;padding:9px;border:1px solid #e8e8e8;border-radius:8px;background:#fff;cursor:pointer;color:#888;transition:all .2s}
+.tipo-btn.sel{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.setup-err{font-size:12px;color:#E24B4A;margin-bottom:.75rem;display:none}
+.setup-start{width:100%;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:11px;cursor:pointer;margin-top:.5rem}
+.setup-start:hover{background:#0F6E56}
+
+/* UNLOCK BTN */
+.unlock-btn{font-size:11px;font-weight:500;font-family:'Inter',sans-serif;background:transparent;color:#1D9E75;border:1px solid #1D9E75;border-radius:20px;padding:4px 12px;cursor:pointer;margin-left:auto}
+.unlock-btn:hover{background:#E1F5EE}
+.sess-status{font-size:9px;color:#1D9E75;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SETUP SCREEN -->
+<div class="setup-overlay" id="setup-overlay">
+  <div class="setup-box">
+    <div class="setup-logo">Norte <span>Financiero</span></div>
+    <div class="setup-sub">Fase 1 — Panel de consultora</div>
+    <div class="setup-field">
+      <div class="setup-label">Nombre de la clienta</div>
+      <input class="setup-input" id="setup-nombre" type="text" placeholder="Ej: Andrea Mora">
+    </div>
+    <div class="setup-err" id="setup-err">Ingresá el nombre de la clienta para continuar.</div>
+    <button class="setup-start" onclick="startApp()">Comenzar sesión</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="logo">Norte <span>Financiero</span></div>
+  <div class="nav-right">
+    <div style="font-size:11px;font-weight:500;background:#FFF8E1;color:#633806;padding:4px 10px;border-radius:20px;border:1px solid #FAC775;margin-right:6px">Consultora</div><div class="fase-badge">Fase 1</div>
+    <div class="badge" id="client-badge">—</div>
+  </div>
+</div>
+
+<!-- SESIONES NAV -->
+<div class="sessions-nav">
+  <button class="sess-btn locked" id="sess-1-btn" onclick="trySession(1)">
+    <span class="sess-num">Sesión 1</span>
+    <span class="sess-name">Diagnóstico</span>
+    <span class="sess-lock">🔒</span>
+  </button>
+  <button class="sess-btn locked" id="sess-2-btn" onclick="trySession(2)">
+    <span class="sess-num">Sesión 2</span>
+    <span class="sess-name">Flujo + Ecuación</span>
+    <span class="sess-lock">🔒</span>
+  </button>
+  <button class="sess-btn locked" id="sess-3-btn" onclick="trySession(3)">
+    <span class="sess-num">Sesión 3</span>
+    <span class="sess-name">Indicadores</span>
+    <span class="sess-lock">🔒</span>
+  </button>
+</div>
+
+<!-- SESIÓN 1 -->
+<div id="sess-1" class="hidden">
+  <div class="locked-view">
+    <div class="lock-circle">🔒</div>
+    <div class="lock-title">Sesión 1 — Diagnóstico</div>
+    <div class="lock-sub">Esta sesión estará disponible próximamente. Tu consultora te dará acceso cuando sea el momento.</div>
+    <div class="lock-dots">
+      <div class="lock-dot"></div>
+      <div class="lock-dot"></div>
+      <div class="lock-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SESIÓN 2 -->
+<div id="sess-2" class="hidden"></div>
+
+<!-- SESIÓN 3 -->
+<div id="sess-3" class="hidden"></div>
+
+<!-- OVERLAY CONTRASEÑA -->
+<div class="pw-overlay hidden" id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-title" id="pw-title">Desbloquear sesión</div>
+    <div class="pw-sub" id="pw-sub">Ingresá la contraseña para dar acceso a la clienta.</div>
+    <input class="pw-input" type="password" id="pw-input" placeholder="Contraseña">
+    <div class="pw-err" id="pw-err">Contraseña incorrecta. Intentá de nuevo.</div>
+    <button class="pw-btn" onclick="checkPw()">Confirmar</button>
+    <button class="pw-cancel" onclick="closePw()">Cancelar</button>
+  </div>
+</div>
+
+</div>
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+var STATE = {
+  nombre: '',
+  tipo: null,
+  irc: 0,
+  ingresosAnuales: [0,0,0,0,0,0,0,0,0,0,0,0],
+  sess2Unlocked: false,
+  sess3Unlocked: false,
+  pendingUnlock: null,
+  chartInstance: null,
+  adminMode: false
+};
+
+var CONTRASENA = 'NorteF2024';  // TEMPORAL — pendiente de definir con María
+var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'];
+var INDS = [
+  {num:1,nombre:'Cobertura de gastos',rango:'≤ 90%'},
+  {num:2,nombre:'Distribución del gasto',rango:'≤ 50% en fijos'},
+  {num:3,nombre:'Ingreso estable',rango:'≥ 80%'},
+  {num:4,nombre:'Liquidez',rango:'≥ 1.5x'},
+  {num:5,nombre:'Endeudamiento',rango:'≤ 50%'},
+  {num:6,nombre:'Tasa de ahorro',rango:'≥ 10%'},
+  {num:7,nombre:'Deuda buena vs deuda mala',rango:'≤ 40% corto plazo'},
+];
+var COLS = {
+  verde:{bg:'#1D9E75',label:'Saludable',text:'#085041'},
+  amarillo:{bg:'#EF9F27',label:'Precaución',text:'#633806'},
+  rojo:{bg:'#E24B4A',label:'Atención urgente',text:'#791F1F'},
+  gris:{bg:'#888780',label:'Sin dato',text:'#444441'}
+};
+
+// ============================================================
+// SETUP INICIAL
+// ============================================================
+function selectTipo(tipo, btn) {
+  STATE.tipo = tipo;
+  ['fijo','mixto','variable'].forEach(function(t) {
+    document.getElementById('tipo-'+t).classList.toggle('sel', t===tipo);
+  });
+}
+
+function startApp() {
+  var nombre = document.getElementById('setup-nombre').value.trim();
+  var err = document.getElementById('setup-err');
+  if (!nombre) { err.style.display='block'; return; }
+  err.style.display = 'none';
+  STATE.nombre = nombre;
+  STATE.tipo = 'fijo'; // default, se actualiza cuando se defina en diagnóstico
+  document.getElementById('client-badge').textContent = nombre;
+  document.getElementById('setup-overlay').style.display = 'none';
+  buildSess2();
+  buildSess3Admin();
+  STATE.sess2Unlocked = true;
+  STATE.sess3Unlocked = true;
+  unlockSessBtn(2);
+  unlockSessBtn(3);
+  setTimeout(function(){ showSession(2); }, 150);
+}
+
+// ============================================================
+// NAVEGACIÓN SESIONES
+// ============================================================
+function trySession(n) {
+  if (n===1) { showSession(1); return; }
+  if (n===2 && !STATE.sess2Unlocked) { openPw(2); return; }
+  if (n===3 && !STATE.sess3Unlocked) { openPw(3); return; }
+  showSession(n);
+}
+
+function showSession(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('sess-'+i).classList.add('hidden');
+    var btn = document.getElementById('sess-'+i+'-btn');
+    btn.classList.remove('act');
+  });
+  document.getElementById('sess-'+n).classList.remove('hidden');
+  document.getElementById('sess-'+n+'-btn').classList.add('act');
+}
+
+// ============================================================
+// CONTRASEÑA
+// ============================================================
+function openPw(sessNum) {
+  STATE.pendingUnlock = sessNum;
+  document.getElementById('pw-title').textContent = 'Desbloquear Sesión ' + sessNum;
+  document.getElementById('pw-sub').textContent = sessNum===3
+    ? 'Ingresá la contraseña para dar acceso a la clienta a sus Indicadores.'
+    : 'Ingresá la contraseña para dar acceso a la clienta al Flujo y Ecuación Contable.';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-err').style.display = 'none';
+  document.getElementById('pw-overlay').classList.remove('hidden');
+  setTimeout(function(){document.getElementById('pw-input').focus();},100);
+}
+
+function closePw() {
+  document.getElementById('pw-overlay').classList.add('hidden');
+  STATE.pendingUnlock = null;
+}
+
+function checkPw() {
+  var val = document.getElementById('pw-input').value;
+  if (val === CONTRASENA) {
+    var n = STATE.pendingUnlock;
+    closePw();
+    if (n===2) {
+      STATE.sess2Unlocked = true;
+      unlockSessBtn(2);
+    } else if (n===3) {
+      STATE.sess3Unlocked = true;
+      unlockSessBtn(3);
+      buildSess3Client();
+    }
+    showSession(n);
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key==='Enter' && document.activeElement===document.getElementById('pw-input')) checkPw();
+});
+
+function unlockSessBtn(n) {
+  var btn = document.getElementById('sess-'+n+'-btn');
+  btn.classList.remove('locked');
+  var lock = btn.querySelector('.sess-lock');
+  if (lock) { lock.textContent = '✓'; lock.style.color='#1D9E75'; lock.style.fontSize='12px'; }
+}
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+function fmt(n) { return '₡'+Math.round(n).toLocaleString('es-CR'); }
+function sumCls(cls) {
+  return Array.from(document.querySelectorAll('.'+cls))
+    .reduce(function(a,e){ return a+(parseFloat(e.value)||0); }, 0);
+}
+function addRow(cid, cls, ph, cb) {
+  var d = document.createElement('div'); d.className='irow';
+  d.innerHTML='<input style="border:none;background:transparent;outline:none;flex:1;font-size:13px;font-family:Inter,sans-serif;color:#1a1a1a" type="text" placeholder="'+ph+'"><span class="cur">₡</span><input class="ainput '+cls+'" type="number" value="0" oninput="'+cb+'" style="font-family:Inter,sans-serif">';
+  document.getElementById(cid).appendChild(d);
+}
+function showSubTab(section, tab, btn) {
+  // Only hide direct sub-sections, not parent containers
+  var subSections = {
+    's2': ['ingresos','gastos','ahorro','flujo','ecuacion','patron','mes'],
+  };
+  var sections = subSections[section] || [];
+  sections.forEach(function(s){
+    var el = document.getElementById(section+'-'+s);
+    if(el) el.classList.add('hidden');
+  });
+  var target = document.getElementById(section+'-'+tab);
+  if(target) target.classList.remove('hidden');
+  btn.closest('.sub-tabs').querySelectorAll('.stab').forEach(function(b){ b.classList.remove('act'); });
+  btn.classList.add('act');
+}
+
+// ============================================================
+// SESIÓN 2 — FLUJO + ECUACIÓN
+// ============================================================
+function buildSess2() {
+  var container = document.getElementById('sess-2');
+  var esFijo = STATE.tipo === 'fijo';
+  var esMixto = !esFijo;
+
+  container.innerHTML = '';
+
+  // Sub-tabs
+  var tabs = document.createElement('div');
+  tabs.className = 'sub-tabs';
+
+  if (esFijo) {
+    tabs.innerHTML =
+      '<button class="stab act" onclick="showSubTab(\'s2\',\'ingresos\',this)">Mis ingresos</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'gastos\',this)">Mis gastos</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'ahorro\',this)">Mi ahorro</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'flujo\',this)">Mi flujo</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'ecuacion\',this)">Ecuación contable</button>';
+  } else {
+    tabs.innerHTML =
+      '<button class="stab act" onclick="showSubTab(\'s2\',\'patron\',this)">Patrón anual</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'mes\',this)">Mes actual</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'flujo\',this)">Mi flujo</button>'+
+      '<button class="stab" onclick="showSubTab(\'s2\',\'ecuacion\',this)">Ecuación contable</button>';
+  }
+  container.appendChild(tabs);
+
+  var content = document.createElement('div');
+  content.className = 'content';
+
+  if (esFijo) {
+    content.innerHTML = buildFijoHTML() + buildEcuacionHTML();
+  } else {
+    content.innerHTML = buildMixtoHTML() + buildEcuacionHTML();
+  }
+  container.appendChild(content);
+
+  // Recalculate on load
+  setTimeout(function(){
+    if(esFijo) recalcFijo();
+    else recalcMixto();
+    recalcEc();
+    if(esMixto) buildChart();
+  }, 100);
+}
+
+function buildFijoHTML() {
+  return `
+<div id="s2-ingresos">
+  <p class="stitle">Mis ingresos</p>
+  <p class="ssub">Todo el dinero que entra a tu bolsillo cada mes.</p>
+  <div class="cat-head">Ingresos fijos</div>
+  <div id="fi-fijos">
+    <div class="irow"><span class="idesc">Salario / Empleo principal (neto)</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Pensión / Jubilación</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Alquiler de propiedad</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Pensión alimenticia que recibo</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Apoyo de familia (regular)</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Transferencias regulares</span><span class="cur">₡</span><input class="ainput fi-fijo" type="number" value="0" oninput="recalcFijo()"></div>
+  </div>
+  <button class="addbtn" onclick="addRow('fi-fijos','fi-fijo','Otro ingreso fijo','recalcFijo()')">+ Agregar</button>
+  <div class="cat-head">Ingresos variables</div>
+  <div id="fi-vars">
+    <div class="irow"><span class="idesc">Freelance / Chambas</span><span class="cur">₡</span><input class="ainput fi-var" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Negocio propio</span><span class="cur">₡</span><input class="ainput fi-var" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Comisiones / Bonos</span><span class="cur">₡</span><input class="ainput fi-var" type="number" value="0" oninput="recalcFijo()"></div>
+    <div class="irow"><span class="idesc">Intereses de inversiones</span><span class="cur">₡</span><input class="ainput fi-var" type="number" value="0" oninput="recalcFijo()"></div>
+  </div>
+  <button class="addbtn" onclick="addRow('fi-vars','fi-var','Otro ingreso variable','recalcFijo()')">+ Agregar</button>
+  <div class="tot"><span class="tlabel">Total ingresos</span><span class="tamt g" id="fi-tot-inc">₡0</span></div>
+</div>
+
+<div id="s2-gastos" class="hidden">
+  <p class="stitle">Mis gastos</p>
+  <p class="ssub">Todo lo que sale. Ser honesta aquí es el primer paso para recuperar el control.</p>
+  <div class="cat-head">Gastos fijos</div>
+  <div class="sub-head">Vivienda</div>
+  <div id="gf-viv"><div class="irow"><span class="idesc">Renta o pago de hipoteca</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Impuesto bienes inmuebles / mantenimiento</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Servicios básicos</div>
+  <div id="gf-serv"><div class="irow"><span class="idesc">Luz</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Agua</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Internet</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Teléfono celular</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Cable / Streaming</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Transporte fijo</div>
+  <div id="gf-trf"><div class="irow"><span class="idesc">Pago de auto (crédito)</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Seguro del auto (INS)</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Marchamo (COSEVI)</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Pagos de deudas</div>
+  <div id="gf-deu"><div class="irow"><span class="idesc">Tarjeta de crédito 1</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Tarjeta de crédito 2</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Tarjeta de crédito 3</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Préstamo personal</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Préstamo familiar</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Compras a meses</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <button class="addbtn" onclick="addRow('gf-deu','gf-fijo','Otra deuda','recalcFijo()')">+ Agregar deuda</button>
+  <div class="sub-head">Familia</div>
+  <div id="gf-fam"><div class="irow"><span class="idesc">Colegiatura / Guardería</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Pensión alimenticia que pago</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Ayuda a padres / familiares</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Seguro de vida familiar</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Salud fija</div>
+  <div id="gf-sal"><div class="irow"><span class="idesc">Seguro médico privado (INS)</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Seguro complementario CCSS</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Terapia / Psicólogo</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Medicamentos crónicos</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Otros fijos</div>
+  <div id="gf-otros"><div class="irow"><span class="idesc">Ayuda doméstica / limpieza</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Apps / Suscripciones digitales</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Envíos de dinero al exterior</span><span class="cur">₡</span><input class="ainput gf-fijo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <button class="addbtn" onclick="addRow('gf-otros','gf-fijo','Otro gasto fijo','recalcFijo()')">+ Agregar fijo</button>
+  <div class="cat-head">Gastos variables</div>
+  <div class="sub-head">Transporte variable</div>
+  <div id="gv-trf"><div class="irow"><span class="idesc">Gasolina / Combustible</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Transporte público / bus</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Uber / Taxis</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Mantenimiento del auto</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Alimentación y hogar</div>
+  <div id="gv-alim"><div class="irow"><span class="idesc">Supermercado / Despensa</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Feria / Mercado / Verdulería</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Productos limpieza del hogar</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Artículos de higiene personal</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Gas (tanque / tubería)</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Familia variable</div>
+  <div id="gv-fam"><div class="irow"><span class="idesc">Útiles / uniformes escolares</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Actividades extracurriculares</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Pañales / leche / artículos bebé</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Salud variable</div>
+  <div id="gv-sal"><div class="irow"><span class="idesc">Medicamentos (no crónicos)</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Consultas médicas / especialistas</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Exámenes / laboratorios</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Dentista / Ortodoncia</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Mascotas</div>
+  <div id="gv-masc"><div class="irow"><span class="idesc">Comida / alimento para mascota</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Veterinario / vacunas</span><span class="cur">₡</span><input class="ainput gf-var" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <button class="addbtn" onclick="addRow('gv-masc','gf-var','Otro variable','recalcFijo()')">+ Agregar variable</button>
+  <div class="cat-head">Gastos discrecionales</div>
+  <div class="sub-head">Comidas fuera</div>
+  <div id="gd-com"><div class="irow"><span class="idesc">Restaurantes / almuerzos fuera</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Delivery (Uber Eats, Rappi)</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Cafés / snacks / antojos</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Cuidado personal</div>
+  <div id="gd-per"><div class="irow"><span class="idesc">Ropa y calzado</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Peluquería / salón de belleza</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Maquillaje / cosméticos</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Manicure / spa</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Gimnasio / yoga / deportes</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="sub-head">Entretenimiento</div>
+  <div id="gd-ent"><div class="irow"><span class="idesc">Salidas / cine / teatro</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Viajes / escapadas</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Hobbies / pasatiempos</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Libros / cursos no obligatorios</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Regalos (cumpleaños, fiestas)</span><span class="cur">₡</span><input class="ainput gf-disc" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <button class="addbtn" onclick="addRow('gd-ent','gf-disc','Otro discrecional','recalcFijo()')">+ Agregar discrecional</button>
+  <div class="tot"><span class="tlabel">Total gastos</span><span class="tamt r" id="fi-tot-exp">₡0</span></div>
+</div>
+
+<div id="s2-ahorro" class="hidden">
+  <p class="stitle">Mi ahorro y protección</p>
+  <p class="ssub">No es un gasto — es dinero que separás para tu futuro y seguridad.</p>
+  <div class="cat-head">Ahorro e inversiones</div>
+  <div id="ah-inv"><div class="irow"><span class="idesc">Ahorro automático mensual</span><span class="cur">₡</span><input class="ainput ah-inv" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Inversiones mensuales (fondos SUGEVAL)</span><span class="cur">₡</span><input class="ainput ah-inv" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Ahorro para metas específicas</span><span class="cur">₡</span><input class="ainput ah-inv" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Aportación voluntaria a pensión (OPC)</span><span class="cur">₡</span><input class="ainput ah-inv" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Ahorro en dólares / divisas</span><span class="cur">₡</span><input class="ainput ah-inv" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="cat-head">Fondo de emergencias</div>
+  <div id="ah-fondo"><div class="irow"><span class="idesc">Aporte mensual al fondo de emergencias</span><span class="cur">₡</span><input class="ainput ah-fondo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Reserva para gastos médicos imprevistos</span><span class="cur">₡</span><input class="ainput ah-fondo" type="number" value="0" oninput="recalcFijo()"></div><div class="irow"><span class="idesc">Fondo para reparaciones hogar / auto</span><span class="cur">₡</span><input class="ainput ah-fondo" type="number" value="0" oninput="recalcFijo()"></div></div>
+  <div class="tot"><span class="tlabel">Total ahorro y protección</span><span class="tamt b" id="fi-tot-sav">₡0</span></div>
+</div>
+
+<div id="s2-flujo" class="hidden">
+  <p class="stitle">Mi flujo</p>
+  <p class="ssub">La foto completa de tu dinero cada mes.</p>
+  <div id="fi-hero" class="hero eq"><div class="hlabel" id="fi-hlabel">Flujo mensual</div><div class="hamt" id="fi-hamt">₡0</div><div class="hmsg" id="fi-hmsg">Ingresá tus datos para ver tu flujo.</div></div>
+  <div class="fcard">
+    <div class="frow"><span class="lbl">Ingresos fijos</span><span style="font-weight:500;color:#1D9E75" id="fl-fi-fijo">₡0</span></div>
+    <div class="frow"><span class="lbl">Ingresos variables</span><span style="font-weight:500;color:#1D9E75" id="fl-fi-var">₡0</span></div>
+    <div class="frow total"><span class="lbl">Total ingresos</span><span style="font-weight:500;color:#1D9E75" id="fl-fi-inc">₡0</span></div>
+  </div>
+  <div class="fcard">
+    <div class="frow"><span class="lbl">Gastos fijos</span><span style="font-weight:500;color:#E24B4A" id="fl-fi-gf">₡0</span></div>
+    <div class="frow"><span class="lbl">Gastos variables</span><span style="font-weight:500;color:#E24B4A" id="fl-fi-gv">₡0</span></div>
+    <div class="frow"><span class="lbl">Gastos discrecionales</span><span style="font-weight:500;color:#E24B4A" id="fl-fi-gd">₡0</span></div>
+    <div class="frow total"><span class="lbl">Total gastos</span><span style="font-weight:500;color:#E24B4A" id="fl-fi-exp">₡0</span></div>
+  </div>
+  <div class="fcard">
+    <div class="frow"><span class="lbl">Ahorro e inversiones</span><span style="font-weight:500;color:#378ADD" id="fl-fi-ai">₡0</span></div>
+    <div class="frow"><span class="lbl">Fondo de emergencias</span><span style="font-weight:500;color:#378ADD" id="fl-fi-fe">₡0</span></div>
+    <div class="frow total"><span class="lbl">Total ahorro</span><span style="font-weight:500;color:#378ADD" id="fl-fi-sav">₡0</span></div>
+  </div>
+  <div class="bwrap"><div class="blrow"><span>Ingresos</span><span>100%</span></div><div class="btrack"><div class="bfill inc" style="width:100%"></div></div></div>
+  <div class="bwrap"><div class="blrow"><span>Gastos</span><span id="pct-fi-exp">0%</span></div><div class="btrack"><div class="bfill exp" id="bar-fi-exp" style="width:0%"></div></div></div>
+  <div class="bwrap"><div class="blrow"><span>Ahorro</span><span id="pct-fi-sav">0%</span></div><div class="btrack"><div class="bfill sav" id="bar-fi-sav" style="width:0%"></div></div></div>
+</div>`;
+}
+
+function buildMixtoHTML() {
+  return `
+<div id="s2-patron">
+  <p class="stitle">Patrón anual de ingresos</p>
+  <p class="ssub">Tu comportamiento de ingresos durante el año y tu Ingreso de Referencia Conservador.</p>
+  <div class="irc-box">
+    <div class="irc-label">IRC — Ingreso de Referencia Conservador</div>
+    <div class="irc-val" id="mx-irc-display">₡0</div>
+    <div class="irc-desc">El ingreso que la mayoría de tus meses normales supera. Es conservador y realista — es tu base de planificación.</div>
+  </div>
+  <div class="fcard" style="margin-bottom:1rem">
+    <div class="frow"><span class="lbl">Total ingresos del año</span><span style="font-weight:500;color:#1D9E75" id="mx-total-ano">₡0</span></div>
+    <div class="frow"><span class="lbl">Mejor mes del año</span><span style="font-weight:500;color:#1D9E75" id="mx-mejor-mes">₡0</span></div>
+    <div class="frow"><span class="lbl" style="color:#E24B4A">Mes más bajo del año</span><span style="font-weight:500;color:#E24B4A" id="mx-peor-mes">₡0</span></div>
+    <div class="frow"><span class="lbl">Promedio mensual</span><span style="font-weight:500" id="mx-promedio">₡0</span></div>
+    <div class="frow total"><span class="lbl">IRC — Base de planificación</span><span style="font-weight:500;color:#1D9E75" id="mx-irc-resumen">₡0</span></div>
+  </div>
+  <div class="fcard" style="margin-bottom:1rem">
+    <div class="frow"><span class="lbl">Promedio ingresos FIJOS</span><span style="font-weight:500" id="mx-prom-fijos">₡0</span></div>
+    <div class="frow"><span class="lbl">Promedio ingresos VARIABLES</span><span style="font-weight:500" id="mx-prom-vars">₡0</span></div>
+    <div class="frow"><span class="lbl">Promedio ingresos DISCRECIONALES</span><span style="font-weight:500" id="mx-prom-disc">₡0</span></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">Comportamiento anual de ingresos</div>
+    <canvas id="estacionalidad-chart" height="140"></canvas>
+  </div>
+  <div class="cat-head">Ingresá los datos del mapa de estacionalidad</div>
+  <p style="font-size:12px;color:#888;margin-bottom:.75rem">Estos datos los trasladás desde tu Excel después del mapa de estacionalidad.</p>
+  <div class="admin-grid" style="margin-bottom:.5rem">
+    <div class="admin-field"><div class="admin-label">IRC (₡)</div><input class="admin-input" id="cfg-irc" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="admin-field"><div class="admin-label">Promedio mensual (₡)</div><input class="admin-input" id="cfg-promedio" type="number" value="0" oninput="updateMixtoStats()"></div>
+  </div>
+  <div class="admin-grid" style="margin-bottom:.5rem">
+    <div class="admin-field"><div class="admin-label">Promedio fijos (₡)</div><input class="admin-input" id="cfg-prom-fijos" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="admin-field"><div class="admin-label">Promedio variables (₡)</div><input class="admin-input" id="cfg-prom-vars" type="number" value="0" oninput="updateMixtoStats()"></div>
+  </div>
+  <div class="admin-grid" style="margin-bottom:1rem">
+    <div class="admin-field"><div class="admin-label">Promedio discrecionales (₡)</div><input class="admin-input" id="cfg-prom-disc" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div></div>
+  </div>
+  <div class="admin-label" style="margin-bottom:.5rem">Ingresos reales por mes (₡)</div>
+  <div class="meses-grid">
+    <div class="mes-field"><div class="mes-label">Enero</div><input class="mes-input" id="m0" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Febrero</div><input class="mes-input" id="m1" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Marzo</div><input class="mes-input" id="m2" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Abril</div><input class="mes-input" id="m3" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Mayo</div><input class="mes-input" id="m4" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Junio</div><input class="mes-input" id="m5" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Julio</div><input class="mes-input" id="m6" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Agosto</div><input class="mes-input" id="m7" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Setiembre</div><input class="mes-input" id="m8" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Octubre</div><input class="mes-input" id="m9" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Noviembre</div><input class="mes-input" id="m10" type="number" value="0" oninput="updateMixtoStats()"></div>
+    <div class="mes-field"><div class="mes-label">Diciembre</div><input class="mes-input" id="m11" type="number" value="0" oninput="updateMixtoStats()"></div>
+  </div>
+</div>
+
+<div id="s2-mes" class="hidden">
+  <p class="stitle">Mes actual</p>
+  <p class="ssub">Ingresá los datos reales de este mes.</p>
+  <div class="irc-box"><div class="irc-label">IRC — Ingreso de Referencia Conservador</div><div class="irc-val" id="mx-irc-mes">₡0</div><div class="irc-desc">Tu ingreso base de planificación.</div></div>
+  <div class="cat-head">Ingresos fijos</div>
+  <div id="mx-fijos"><div class="irow"><span class="idesc">Salario / Empleo principal (neto)</span><span class="cur">₡</span><input class="ainput mx-fijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Pensión alimenticia que recibo</span><span class="cur">₡</span><input class="ainput mx-fijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Alquiler de propiedad</span><span class="cur">₡</span><input class="ainput mx-fijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Apoyo de familia (regular)</span><span class="cur">₡</span><input class="ainput mx-fijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="cat-head">Ingresos variables</div>
+  <div id="mx-vars"><div class="irow"><span class="idesc">Negocio propio — ventas del mes</span><span class="cur">₡</span><input class="ainput mx-var" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Freelance / Servicios independientes</span><span class="cur">₡</span><input class="ainput mx-var" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Comisiones / Bonos</span><span class="cur">₡</span><input class="ainput mx-var" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Proyectos / Consultorías</span><span class="cur">₡</span><input class="ainput mx-var" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="cat-head">Ingresos esporádicos</div>
+  <div id="mx-espo"><div class="irow"><span class="idesc">Bono / Aguinaldo / Extra</span><span class="cur">₡</span><input class="ainput mx-espo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Venta de activos o bienes</span><span class="cur">₡</span><input class="ainput mx-espo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="tot"><span class="tlabel">Total ingresos del mes</span><span class="tamt g" id="mx-tot-inc">₡0</span></div>
+  <div class="cat-head" style="margin-top:1.5rem">Gastos fijos</div>
+  <div class="sub-head">Vivienda</div>
+  <div id="mx-gf-viv"><div class="irow"><span class="idesc">Renta o pago de hipoteca</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Cuota condominio / mantenimiento</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="sub-head">Servicios básicos</div>
+  <div id="mx-gf-serv"><div class="irow"><span class="idesc">Electricidad</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Agua</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Internet</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Teléfono celular</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Cable / Streaming</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="sub-head">Transporte fijo</div>
+  <div id="mx-gf-trf"><div class="irow"><span class="idesc">Crédito del auto</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Seguro del auto (INS)</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="sub-head">Pagos de deudas</div>
+  <div id="mx-gf-deu"><div class="irow"><span class="idesc">Tarjeta de crédito 1</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Tarjeta de crédito 2</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Préstamo personal</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Préstamo de vehículo</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Hipoteca</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="sub-head">Familia y salud fija</div>
+  <div id="mx-gf-fam"><div class="irow"><span class="idesc">Colegiatura / Guardería</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Pensión alimenticia que pago</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Seguro médico privado (INS)</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Terapia / Psicólogo</span><span class="cur">₡</span><input class="ainput mx-gfijo" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <button class="addbtn" onclick="addRow('mx-gf-fam','mx-gfijo','Otro gasto fijo','recalcMixto()')">+ Agregar fijo</button>
+  <div class="cat-head">Gastos variables</div>
+  <div id="mx-gv-all"><div class="irow"><span class="idesc">Supermercado / Despensa</span><span class="cur">₡</span><input class="ainput mx-gvar" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Gasolina / Transporte</span><span class="cur">₡</span><input class="ainput mx-gvar" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Medicamentos / Consultas</span><span class="cur">₡</span><input class="ainput mx-gvar" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Útiles / Actividades escolares</span><span class="cur">₡</span><input class="ainput mx-gvar" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <button class="addbtn" onclick="addRow('mx-gv-all','mx-gvar','Otro gasto variable','recalcMixto()')">+ Agregar variable</button>
+  <div class="cat-head">Gastos discrecionales</div>
+  <div id="mx-gd-all"><div class="irow"><span class="idesc">Restaurantes / delivery</span><span class="cur">₡</span><input class="ainput mx-gdisc" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Ropa / belleza / cuidado personal</span><span class="cur">₡</span><input class="ainput mx-gdisc" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Entretenimiento / salidas</span><span class="cur">₡</span><input class="ainput mx-gdisc" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <button class="addbtn" onclick="addRow('mx-gd-all','mx-gdisc','Otro discrecional','recalcMixto()')">+ Agregar discrecional</button>
+  <div class="tot"><span class="tlabel">Total gastos del mes</span><span class="tamt r" id="mx-tot-exp">₡0</span></div>
+  <div class="cat-head" style="margin-top:1.5rem">Ahorro y protección</div>
+  <div id="mx-ah"><div class="irow"><span class="idesc">Ahorro automático mensual</span><span class="cur">₡</span><input class="ainput mx-ahorro" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Inversiones mensuales</span><span class="cur">₡</span><input class="ainput mx-ahorro" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Fondo de emergencias (aporte mensual)</span><span class="cur">₡</span><input class="ainput mx-ahorro" type="number" value="0" oninput="recalcMixto()"></div><div class="irow"><span class="idesc">Fondo de nivelación (aporte)</span><span class="cur">₡</span><input class="ainput mx-ahorro" type="number" value="0" oninput="recalcMixto()"></div></div>
+  <div class="tot"><span class="tlabel">Total ahorro y protección</span><span class="tamt b" id="mx-tot-sav">₡0</span></div>
+  <div class="fcard" style="margin-top:1.5rem">
+    <div class="frow"><span class="lbl">Total ingresos</span><span style="font-weight:500;color:#1D9E75" id="mx-fl-inc">₡0</span></div>
+    <div class="frow"><span class="lbl">Total gastos</span><span style="font-weight:500;color:#E24B4A" id="mx-fl-exp">₡0</span></div>
+    <div class="frow"><span class="lbl">Total ahorro y protección</span><span style="font-weight:500;color:#378ADD" id="mx-fl-sav">₡0</span></div>
+    <div class="frow total"><span class="lbl">Flujo final del mes</span><span style="font-weight:500" id="mx-fl-net">₡0</span></div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0">
+      <span style="font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px">¿Qué significa? </span>
+      <span style="font-size:12px;color:#888;font-style:italic" id="mx-fl-sig">Ingresá tus datos para ver el resultado.</span>
+    </div>
+  </div>
+</div>
+
+<div id="s2-flujo" class="hidden">
+  <p class="stitle">Mi flujo — 3 escenarios</p>
+  <p class="ssub">La regla de oro: en los meses buenos no vivís mejor — te preparás para los meses malos.</p>
+  <div class="esc-grid">
+    <div class="esc-card"><div class="esc-head bajo">Mes bajo</div><div class="esc-row"><span>Ingresos</span><span class="ev" id="eb-inc">₡0</span></div><div class="esc-row"><span>Gastos fijos</span><span class="ev" id="eb-gf">₡0</span></div><div class="esc-row"><span>Gastos variables</span><span class="ev" id="eb-gv">₡0</span></div><div class="esc-row"><span>Gastos discr.</span><span class="ev" id="eb-gd">₡0</span></div><div class="esc-row"><span>Ahorro</span><span class="ev">₡0</span></div><div class="esc-net"><span>Flujo final</span><span id="eb-net" style="color:#E24B4A">₡0</span></div><div class="esc-sig" id="eb-sig">—</div></div>
+    <div class="esc-card"><div class="esc-head medio">Mes medio</div><div class="esc-row"><span>Ingresos (IRC)</span><span class="ev" id="em-inc">₡0</span></div><div class="esc-row"><span>Gastos fijos</span><span class="ev" id="em-gf">₡0</span></div><div class="esc-row"><span>Gastos variables</span><span class="ev" id="em-gv">₡0</span></div><div class="esc-row"><span>Gastos discr.</span><span class="ev" id="em-gd">₡0</span></div><div class="esc-row"><span>Ahorro</span><span class="ev" id="em-sav">₡0</span></div><div class="esc-net"><span>Flujo final</span><span id="em-net" style="color:#BA7517">₡0</span></div><div class="esc-sig" id="em-sig">—</div></div>
+    <div class="esc-card"><div class="esc-head alto">Mes alto</div><div class="esc-row"><span>Ingresos reales</span><span class="ev" id="ea-inc">₡0</span></div><div class="esc-row"><span>Gastos fijos</span><span class="ev" id="ea-gf">₡0</span></div><div class="esc-row"><span>Gastos variables</span><span class="ev" id="ea-gv">₡0</span></div><div class="esc-row"><span>Gastos discr.</span><span class="ev" id="ea-gd">₡0</span></div><div class="esc-row"><span>Ahorro</span><span class="ev" id="ea-sav">₡0</span></div><div class="esc-net"><span>Flujo final</span><span id="ea-net" style="color:#1D9E75">₡0</span></div><div class="esc-sig" id="ea-sig">—</div></div>
+  </div>
+  <div class="regla">Regla de oro: En los meses buenos no vivís mejor — te preparás para los meses malos. Usá el IRC como base de todos tus cálculos, sin importar cuánto entraste este mes.</div>
+</div>`;
+}
+
+function buildEcuacionHTML() {
+  return `
+<div id="s2-ecuacion" class="hidden">
+  <p class="stitle">Ecuación contable</p>
+  <p class="ssub">Todo lo que tenés menos todo lo que debés = tu patrimonio real.</p>
+  <div class="cat-head">Mis activos — lo que TENGO</div>
+  <div class="sub-head">Efectivo y cuentas bancarias</div>
+  <div id="ac-efectivo"><div class="irow"><span class="idesc">Efectivo en casa</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Cuenta de ahorro — banco 1</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Cuenta de ahorro — banco 2</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Cuenta corriente</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div></div>
+  <div class="sub-head">Inversiones</div>
+  <div id="ac-inv"><div class="irow"><span class="idesc">Certificados a plazo (CDPs)</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Fondos de inversión (SAFIs)</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Acciones en bolsa</span><span class="cur">₡</span><input class="ainput ac-corr" type="number" value="0" oninput="recalcEc()"></div></div>
+  <button class="addbtn" onclick="addRow('ac-inv','ac-corr','Otra inversión','recalcEc()')">+ Agregar activo líquido</button>
+  <div class="sub-head" style="margin-top:1rem">Activos no corrientes</div>
+  <div id="ac-noCorr"><div class="irow"><span class="idesc">OPC / Pensión complementaria (ROP)</span><span class="cur">₡</span><input class="ainput ac-nocorr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Casa / Departamento donde vivo</span><span class="cur">₡</span><input class="ainput ac-nocorr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Segunda propiedad / Terreno</span><span class="cur">₡</span><input class="ainput ac-nocorr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Auto (valor de mercado)</span><span class="cur">₡</span><input class="ainput ac-nocorr" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Joyería de valor (más de ₡500,000)</span><span class="cur">₡</span><input class="ainput ac-nocorr" type="number" value="0" oninput="recalcEc()"></div></div>
+  <button class="addbtn" onclick="addRow('ac-noCorr','ac-nocorr','Otro activo fijo','recalcEc()')">+ Agregar activo fijo</button>
+  <div class="tot"><span class="tlabel">Total activos</span><span class="tamt g" id="ec-tot-act">₡0</span></div>
+
+  <div class="cat-head" style="margin-top:1.5rem">Mis pasivos — lo que DEBO</div>
+  <div class="sub-head">Pasivos circulantes — menos de 1 año</div>
+  <div id="pas-circ"><div class="irow"><span class="idesc">Tarjeta de crédito 1</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Tarjeta de crédito 2</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Tarjeta de crédito 3</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">App micropréstamo (Tala, Vivus)</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Préstamo familiar (corto plazo)</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Compras a meses sin intereses</span><span class="cur">₡</span><input class="ainput pas-circ" type="number" value="0" oninput="recalcEc()"></div></div>
+  <button class="addbtn" onclick="addRow('pas-circ','pas-circ','Otra deuda corto plazo','recalcEc()')">+ Agregar</button>
+  <div class="sub-head" style="margin-top:.75rem">Pasivos fijos — más de 1 año</div>
+  <div id="pas-fijo"><div class="irow"><span class="idesc">Hipoteca (saldo pendiente)</span><span class="cur">₡</span><input class="ainput pas-fijo" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Crédito automotriz</span><span class="cur">₡</span><input class="ainput pas-fijo" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Préstamo personal bancario</span><span class="cur">₡</span><input class="ainput pas-fijo" type="number" value="0" oninput="recalcEc()"></div><div class="irow"><span class="idesc">Crédito educativo</span><span class="cur">₡</span><input class="ainput pas-fijo" type="number" value="0" oninput="recalcEc()"></div></div>
+  <button class="addbtn" onclick="addRow('pas-fijo','pas-fijo','Otra deuda largo plazo','recalcEc()')">+ Agregar</button>
+  <div class="tot"><span class="tlabel">Total pasivos</span><span class="tamt r" id="ec-tot-pas">₡0</span></div>
+
+  <div class="pat-eq" style="margin-top:1.5rem">
+    <div class="pat-box"><div class="pat-lbl">Activos</div><div class="pat-val g" id="bal-act">₡0</div></div>
+    <div class="pat-op">−</div>
+    <div class="pat-box"><div class="pat-lbl">Pasivos</div><div class="pat-val r" id="bal-pas">₡0</div></div>
+    <div class="pat-op">=</div>
+    <div class="pat-box"><div class="pat-lbl">Patrimonio</div><div class="pat-val g" id="bal-pat">₡0</div></div>
+  </div>
+  <div class="pat-result">
+    <div class="pat-big" id="bal-net" style="color:#085041">₡0</div>
+    <div class="pat-msg" id="bal-msg">Ingresá tus activos y pasivos para ver tu patrimonio.</div>
+  </div>
+  <div class="fcard">
+    <div class="frow"><span class="lbl">Activos corrientes</span><span style="font-weight:500;color:#1D9E75" id="bal-ac">₡0</span></div>
+    <div class="frow"><span class="lbl">Activos no corrientes</span><span style="font-weight:500;color:#1D9E75" id="bal-anc">₡0</span></div>
+    <div class="frow total"><span class="lbl">Total activos</span><span style="font-weight:500;color:#1D9E75" id="bal-ta">₡0</span></div>
+  </div>
+  <div class="fcard">
+    <div class="frow"><span class="lbl">Pasivos circulantes</span><span style="font-weight:500;color:#E24B4A" id="bal-pc">₡0</span></div>
+    <div class="frow"><span class="lbl">Pasivos fijos</span><span style="font-weight:500;color:#E24B4A" id="bal-pf">₡0</span></div>
+    <div class="frow total"><span class="lbl">Total pasivos</span><span style="font-weight:500;color:#E24B4A" id="bal-tp">₡0</span></div>
+  </div>
+</div>`;
+}
+
+// ============================================================
+// CÁLCULOS FLUJO FIJO
+// ============================================================
+function recalcFijo() {
+  var fijo=sumCls('fi-fijo'), varI=sumCls('fi-var'), inc=fijo+varI;
+  var gf=sumCls('gf-fijo'), gv=sumCls('gf-var'), gd=sumCls('gf-disc'), exp=gf+gv+gd;
+  var ai=sumCls('ah-inv'), fe=sumCls('ah-fondo'), sav=ai+fe;
+  var net=inc-exp-sav;
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('fi-tot-inc',fmt(inc)); set('fi-tot-exp',fmt(exp)); set('fi-tot-sav',fmt(sav));
+  set('fl-fi-fijo',fmt(fijo)); set('fl-fi-var',fmt(varI)); set('fl-fi-inc',fmt(inc));
+  set('fl-fi-gf',fmt(gf)); set('fl-fi-gv',fmt(gv)); set('fl-fi-gd',fmt(gd)); set('fl-fi-exp',fmt(exp));
+  set('fl-fi-ai',fmt(ai)); set('fl-fi-fe',fmt(fe)); set('fl-fi-sav',fmt(sav));
+  var h=document.getElementById('fi-hero');
+  if(!h) return;
+  if(net>0){h.className='hero sup';set('fi-hlabel','Superávit mensual');set('fi-hamt',fmt(net));set('fi-hmsg','Te está sobrando dinero cada mes. Esto es una oportunidad para construir tu futuro.');}
+  else if(net<0){h.className='hero def';set('fi-hlabel','Déficit mensual');set('fi-hamt',fmt(Math.abs(net)));set('fi-hmsg','Estás gastando más de lo que ingresa. Juntas vamos a encontrar de dónde viene esto.');}
+  else{h.className='hero eq';set('fi-hlabel','Equilibrio');set('fi-hamt','₡0');set('fi-hmsg','Tus ingresos y salidas son exactamente iguales.');}
+  var pe=inc>0?Math.min(100,Math.round(exp/inc*100)):0;
+  var ps=inc>0?Math.min(100,Math.round(sav/inc*100)):0;
+  set('pct-fi-exp',pe+'%'); set('pct-fi-sav',ps+'%');
+  var be=document.getElementById('bar-fi-exp'), bs=document.getElementById('bar-fi-sav');
+  if(be) be.style.width=pe+'%'; if(bs) bs.style.width=ps+'%';
+}
+
+// ============================================================
+// CÁLCULOS FLUJO MIXTO
+// ============================================================
+function updateMixtoStats() {
+  var irc = parseFloat(document.getElementById('cfg-irc').value)||0;
+  STATE.irc = irc;
+  var meses = [];
+  for(var i=0;i<12;i++) meses.push(parseFloat(document.getElementById('m'+i).value)||0);
+  STATE.ingresosAnuales = meses;
+  var total = meses.reduce(function(a,b){return a+b;},0);
+  var mejor = Math.max.apply(null,meses.filter(function(v){return v>0;})||[0]);
+  var peor = Math.min.apply(null,meses.filter(function(v){return v>0;})||[0]);
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('mx-total-ano',fmt(total));
+  set('mx-mejor-mes',fmt(mejor||0));
+  set('mx-peor-mes',fmt(peor||0));
+  set('mx-promedio',fmt(parseFloat(document.getElementById('cfg-promedio').value)||0));
+  set('mx-irc-resumen',fmt(irc));
+  set('mx-irc-display',fmt(irc));
+  set('mx-irc-mes',fmt(irc));
+  set('mx-prom-fijos',fmt(parseFloat(document.getElementById('cfg-prom-fijos').value)||0));
+  set('mx-prom-vars',fmt(parseFloat(document.getElementById('cfg-prom-vars').value)||0));
+  set('mx-prom-disc',fmt(parseFloat(document.getElementById('cfg-prom-disc').value)||0));
+  buildChart();
+  recalcMixto();
+}
+
+function recalcMixto() {
+  var irc = STATE.irc;
+  var inc = sumCls('mx-fijo')+sumCls('mx-var')+sumCls('mx-espo');
+  var gf = sumCls('mx-gfijo'), gv = sumCls('mx-gvar'), gd = sumCls('mx-gdisc'), exp=gf+gv+gd;
+  var sav = sumCls('mx-ahorro');
+  var net = inc-exp-sav;
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('mx-tot-inc',fmt(inc)); set('mx-tot-exp',fmt(exp)); set('mx-tot-sav',fmt(sav));
+  set('mx-fl-inc',fmt(inc)); set('mx-fl-exp',fmt(exp)); set('mx-fl-sav',fmt(sav));
+  var netEl=document.getElementById('mx-fl-net');
+  if(netEl){netEl.textContent=fmt(net);netEl.style.color=net>=0?'#1D9E75':'#E24B4A';}
+  var sig='';
+  if(net>0) sig=inc>=irc*1.15?'Excedente — alimentá el Fondo de Nivelación.':'Estás en equilibrio positivo. Ejecutá el plan normal.';
+  else if(net<0) sig='Déficit de '+fmt(Math.abs(net))+' — activá el Fondo de Nivelación.';
+  else sig='Equilibrio exacto. Considerá ajustar para crear un colchón.';
+  set('mx-fl-sig',sig);
+  var bajo=irc*0.8, med=irc, alto=inc;
+  [['eb',bajo],['em',med],['ea',alto]].forEach(function(r,i){
+    var id=r[0], sinc=r[1], netSc=sinc-gf-gv-gd-sav;
+    set(id+'-inc',fmt(sinc)); set(id+'-gf',fmt(gf)); set(id+'-gv',fmt(gv)); set(id+'-gd',fmt(gd));
+    if(id==='em') set('em-sav',fmt(sav));
+    if(id==='ea') set('ea-sav',fmt(sav));
+    var el=document.getElementById(id+'-net');
+    if(el){el.textContent=fmt(netSc);el.style.color=netSc>=0?'#1D9E75':'#E24B4A';}
+    var sigEl=document.getElementById(id+'-sig');
+    if(sigEl){
+      if(netSc>0) sigEl.textContent=i===2?'Excedente → alimentá el Fondo de Nivelación':'Estás en equilibrio';
+      else if(netSc<0) sigEl.textContent='Activá el Fondo de Nivelación';
+      else sigEl.textContent='Equilibrio exacto';
+    }
+  });
+}
+
+function buildChart() {
+  var irc = STATE.irc;
+  var datos = STATE.ingresosAnuales;
+  var canvas = document.getElementById('estacionalidad-chart');
+  if(!canvas) return;
+  if(STATE.chartInstance) STATE.chartInstance.destroy();
+  STATE.chartInstance = new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:MESES,
+      datasets:[{
+        label:'Ingresos',
+        data:datos,
+        backgroundColor:datos.map(function(v){return v>=irc*1.15?'#1D9E75':v>=irc*0.85?'#EF9F27':'#E24B4A';}),
+        borderRadius:4,borderSkipped:false
+      },{
+        type:'line',label:'IRC',
+        data:Array(12).fill(irc),
+        borderColor:'#085041',borderWidth:2,
+        borderDash:[6,3],pointRadius:0,fill:false
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return fmt(c.raw);}}}},
+      scales:{y:{ticks:{callback:function(v){return '₡'+v.toLocaleString('es-CR');}},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+// ============================================================
+// CÁLCULOS ECUACIÓN CONTABLE
+// ============================================================
+function recalcEc() {
+  var ac=sumCls('ac-corr'), anc=sumCls('ac-nocorr'), ta=ac+anc;
+  var pc=sumCls('pas-circ'), pf=sumCls('pas-fijo'), tp=pc+pf;
+  var pat=ta-tp;
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('ec-tot-act',fmt(ta)); set('ec-tot-pas',fmt(tp));
+  set('bal-act',fmt(ta)); set('bal-pas',fmt(tp));
+  var patEl=document.getElementById('bal-pat');
+  if(patEl){patEl.textContent=fmt(pat);patEl.className='pat-val '+(pat>=0?'g':'r');}
+  var netEl=document.getElementById('bal-net');
+  if(netEl){netEl.textContent=fmt(pat);netEl.style.color=pat>=0?'#085041':'#791F1F';}
+  set('bal-ac',fmt(ac)); set('bal-anc',fmt(anc)); set('bal-ta',fmt(ta));
+  set('bal-pc',fmt(pc)); set('bal-pf',fmt(pf)); set('bal-tp',fmt(tp));
+  var msg=pat>0?'Tu patrimonio neto es positivo. Tenés más de lo que debés.':pat<0?'Tu patrimonio neto es negativo. Debés más de lo que tenés. Esto no es permanente — con un plan lo trabajamos juntas.':'Tus activos y pasivos son iguales. Estás en punto de equilibrio.';
+  set('bal-msg',msg);
+}
+
+// ============================================================
+// SESIÓN 3 — INDICADORES (Admin + Client)
+// ============================================================
+function buildSess3Admin() {
+  var container = document.getElementById('sess-3');
+  container.innerHTML = '';
+
+  var adminDiv = document.createElement('div');
+  adminDiv.id = 'sess3-admin';
+  adminDiv.className = 'hidden';
+  adminDiv.innerHTML = buildSess3AdminHTML();
+  container.appendChild(adminDiv);
+
+  var clientDiv = document.createElement('div');
+  clientDiv.id = 'sess3-client';
+  clientDiv.className = 'hidden';
+  clientDiv.innerHTML = '<div class="content"><p class="stitle" style="margin-bottom:.5rem">Mis indicadores financieros</p><div class="perfil-bar"><span class="perfil-lbl">Perfil:</span><span class="meta-val" id="cl-perfil">—</span><span class="irc-meta-lbl" id="cl-irc-lbl" style="display:none">IRC:</span><span class="irc-meta" id="cl-irc" style="display:none">—</span><span class="irc-meta-lbl" id="cl-base-lbl" style="display:none;margin-left:12px">Ingreso base:</span><span class="irc-meta" id="cl-base" style="display:none">—</span></div><div id="cl-ind-cards"></div></div>';
+  container.appendChild(clientDiv);
+}
+
+function buildSess3AdminHTML() {
+  var rows = INDS.map(function(ind,i){
+    return '<div class="ind-admin-panel"><div class="ind-admin-header"><div class="ind-num">'+ind.num+'</div><span style="font-size:13px;font-weight:500;color:#1a1a1a">'+ind.nombre+'</span><span style="font-size:11px;color:#aaa;margin-left:auto">'+ind.rango+'</span></div><div class="admin-grid"><div class="admin-field"><div class="admin-label">Resultado</div><input class="admin-input" id="ar'+i+'" type="text" placeholder="Ej: 96.3%"></div><div class="admin-field"><div class="admin-label">Semáforo</div><select class="admin-select" id="as'+i+'"><option value="verde">Saludable</option><option value="amarillo">Precaución</option><option value="rojo">Atención urgente</option><option value="gris">Sin dato</option></select></div></div><div class="admin-field"><div class="admin-label">Interpretación</div><textarea class="admin-interp" id="ai'+i+'" placeholder="Escribí tu interpretación para esta clienta..."></textarea></div></div>';
+  }).join('');
+
+  var tipoLabel = STATE.tipo==='fijo'?'Fijo':(STATE.tipo==='mixto'?'Mixto / Variable':'Variable');
+
+  return '<div class="content"><div class="admin-bar">Panel de consultora — Completá los indicadores para esta clienta.</div>'+
+    '<div class="admin-section"><div class="admin-section-title">Configuración de indicadores</div>'+
+    '<div class="admin-grid">'+
+    '<div class="admin-field"><div class="admin-label">Perfil detectado</div><input class="admin-input" id="cfg-perfil" type="text" value="'+tipoLabel+'"></div>'+
+    '<div class="admin-field"><div class="admin-label">Ingreso base para ratios (₡)</div><input class="admin-input" id="cfg-ingreso-ratios" type="number" value="0"></div>'+
+    '</div>'+
+    (STATE.tipo!=='fijo'?'<div class="admin-grid"><div class="admin-field"><div class="admin-label">IRC (₡)</div><input class="admin-input" id="cfg-irc-s3" type="number" value="0"></div><div></div></div>':'')+
+    '</div>'+
+    rows+
+    '<button class="apply-btn" onclick="applyIndicadores()">Guardar y mostrar a clienta</button></div>';
+}
+
+function applyIndicadores() {
+  var perfil = document.getElementById('cfg-perfil').value;
+  var base = parseFloat(document.getElementById('cfg-ingreso-ratios').value)||0;
+  var clPerfil = document.getElementById('cl-perfil');
+  if(clPerfil) clPerfil.textContent = perfil;
+
+  var showIrc = STATE.tipo !== 'fijo';
+  ['cl-irc-lbl','cl-irc','cl-base-lbl','cl-base'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display = showIrc?'inline':'none';
+  });
+  if(showIrc) {
+    var ircEl = document.getElementById('cl-irc');
+    var ircS3 = document.getElementById('cfg-irc-s3');
+    if(ircEl && ircS3) ircEl.textContent = fmt(parseFloat(ircS3.value)||0);
+    var baseEl = document.getElementById('cl-base');
+    if(baseEl) baseEl.textContent = fmt(base);
+  }
+
+  var cc = document.getElementById('cl-ind-cards');
+  if(!cc) return;
+  cc.innerHTML = '';
+  INDS.forEach(function(ind,i){
+    var res = document.getElementById('ar'+i).value||'—';
+    var sem = document.getElementById('as'+i).value;
+    var interp = document.getElementById('ai'+i).value;
+    var c = COLS[sem];
+    var card = document.createElement('div'); card.className='ind-card';
+    card.innerHTML='<div class="ind-top">'+
+      '<div class="ind-cell"><div class="ind-cell-lbl">Indicador</div><div class="ind-nombre"><span class="num-b">'+ind.num+'</span>'+ind.nombre+'</div></div>'+
+      '<div class="ind-cell"><div class="ind-cell-lbl">Resultado</div><div style="font-size:15px;font-weight:500">'+res+'</div></div>'+
+      '<div class="ind-cell"><div class="ind-cell-lbl">Rango saludable</div><div style="font-size:12px;color:#888">'+ind.rango+'</div></div>'+
+      '<div class="ind-cell"><div class="ind-cell-lbl">Semáforo</div><div class="sem-row"><div class="sem-dot" style="background:'+c.bg+'"></div><span style="font-size:12px;font-weight:500;color:'+c.text+'">'+c.label+'</span></div></div>'+
+    '</div>'+
+    '<div class="ind-bottom"><div class="ind-interp-lbl">Interpretación</div><div class="ind-interp">'+interp+'</div></div>';
+    cc.appendChild(card);
+  });
+  document.getElementById('sess3-admin').classList.add('hidden');
+  document.getElementById('sess3-client').classList.remove('hidden');
+}
+
+// Cuando se desbloquea sesión 3, mostrar admin
+function buildSess3Client() {
+  document.getElementById('sess3-admin').classList.remove('hidden');
+  document.getElementById('sess3-client').classList.add('hidden');
+}
+
+// Cuando se desbloquea sesión 2, mostrar contenido
+window.origUnlock = unlockSessBtn;
+
+// Sesión 3: al navegar a ella, mostrar admin si está desbloqueada
+var _origShowSession = showSession;
+showSession = function(n) {
+  _origShowSession(n);
+  if(n===3 && STATE.sess3Unlocked) {
+    var adminEl = document.getElementById('sess3-admin');
+    var clientEl = document.getElementById('sess3-client');
+    // Si el cliente ya tiene indicadores cargados, mostrar cliente; sino admin
+    var hasIndicadores = clientEl && document.getElementById('cl-ind-cards') && document.getElementById('cl-ind-cards').children.length > 0;
+    if(hasIndicadores) {
+      if(adminEl) adminEl.classList.add('hidden');
+      if(clientEl) clientEl.classList.remove('hidden');
+    } else {
+      if(adminEl) adminEl.classList.remove('hidden');
+      if(clientEl) clientEl.classList.add('hidden');
+    }
+  }
+};
+</script>
+</body>
+</html>
